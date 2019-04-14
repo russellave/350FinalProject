@@ -71,8 +71,6 @@ module processor(
     data_readRegA,                  // I: Data from port A of regfile
     data_readRegB                   // I: Data from port B of regfile
 	 
-	 ,sensor_input, sensor_output, controller, screen_in, screen_out, mode_in, score_in, score_out, mistake
-	 
 	 ,latch_4_o_out, isSetX,latch_4_d_out, latch_4_ir_out,latch_3_o_out, latch_3_b_out, latch_3_ir_out
 	, Rwd, isALU, latch_2_pc_out, execute_out, execute_b_out, pc_jal, execute_pc, final_A, final_B,disabled_latch_prevclock_twice, ir_in_execute,isReady,latch_2_ir_out, latch_2_a_out, latch_2_b_out, isAddi, WE, latch_3_pc_jal_out, disabled_latch_prevclock,latch_4_pc_jal_out, flush, XM_a_bypass, XM_b_bypass, MW_b_bypass, is_jal, exception, disable_latches, enable //for debugging
 );
@@ -94,18 +92,6 @@ module processor(
     output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     output [31:0] data_writeReg;
     input [31:0] data_readRegA, data_readRegB;
-	 
-	 input [31:0] sensor_input; 
-	 input [31:0] screen_in; 
-	 input [31:0] mode_in;
-	 input [31:0] score_in;  
-	 input [31:0] controller; 
-	 
-	 
-	 output [31:0] sensor_output; 
-	 output [31:0] mistake; 
-	 output [31:0] screen_out; 
-	 output [31:0] score_out; 
 
     /* YOUR CODE STARTS HERE */
 	 

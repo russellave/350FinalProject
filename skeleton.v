@@ -11,7 +11,7 @@ module skeleton(resetn,
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
-	CLOCK_50);  													// 50 MHz clock
+	CLOCK_50, sensor_input, sensor_output, controller);  													// 50 MHz clock
 		
 	////////////////////////	VGA	////////////////////////////
 	output			VGA_CLK;   				//	VGA Clock
@@ -46,6 +46,28 @@ module skeleton(resetn,
 	wire			 ps2_key_pressed;
 	wire	[7:0]	 ps2_out;	
 	
+	//Final Project 
+	
+	input [31:0] sensor_input; //only first (lsb) 24 bits matter. goes to vga controller and processor (address 0)
+
+	output [31:0] sensor_output; //only first 3 bits matter. which light to turn on (address 1)
+	
+	input [31:0] controller; //only first 3 bits matter. goes to processor (address 2)
+
+	// have processor always output (SW)the screen_out, score_out, and mistake
+	
+	wire [31:0] screen_in; //only first 3 bits matter. 0: splash, 1: dummy, 2: leaderboard (address 3)
+	wire [31:0] screen_out; //only first 4 bits matter. 0: splash, 1: dummy, 2: leaderboard, 3: isChangeInScreen (address 4) 
+	wire [31:0] mode_in; //only first 4 bits matter 0: none, 1: save, 2: load, 3: game (address 5) 
+	wire [31:0] score_in; // (address 6)
+	wire [31:0] score_out; // (address 7)
+	wire [31:0] mistake; //only first bit matters. if wrong pad is hit. (address 7) 
+	
+	//params of vga_controller (TO ADD)
+	//sensor_input, screen_out, score, mistake
+	
+
+
 	// clock divider (by 5, i.e., 10 MHz)
 	pll div(CLOCK_50,inclock);
 	assign clock = CLOCK_50;
@@ -54,7 +76,7 @@ module skeleton(resetn,
 	//assign clock = inclock;
 	
 	// your processor
-	processor_skeleton myprocessor(clock, ~resetn, /*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ debug_data_in, debug_addr);
+	processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, controller, screen_in, screen_out, mode_in, score_in, score_out, mistake,/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ debug_data_in, debug_addr);
 	
 	// keyboard controller
 	PS2_Interface myps2(clock, resetn, ps2_clock, ps2_data, ps2_key_data, ps2_key_pressed, ps2_out);

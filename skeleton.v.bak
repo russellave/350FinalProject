@@ -1,4 +1,4 @@
-module skeleton(resetn, 
+module processor_skeleton(resetn, 
 	ps2_clock, ps2_data, 										// ps2 related I/O
 	debug_data_in, debug_addr, leds, 						// extra debugging ports
 	lcd_data, lcd_rw, lcd_en, lcd_rs, lcd_on, lcd_blon,// LCD info

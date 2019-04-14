@@ -9,7 +9,7 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module processor_skeleton(clock, reset,sensor_input, sensor_output, controller, screen_in, screen_out, mode_in, score_in, score_out, mistake //rest is debugging
+module processor_skeleton(clock, reset,sensor_input, sensor_output, controller, screen_out, score_out, mistake //rest is debugging
 ,address_imem,q_imem,address_dmem,
 data,wren,q_dmem,ctrl_writeEnable,ctrl_writeReg,ctrl_readRegA,ctrl_readRegB,
 data_writeReg,data_readRegA,data_readRegB);
@@ -17,9 +17,7 @@ data_writeReg,data_readRegA,data_readRegB);
 
     input clock, reset;
 	 input [31:0] sensor_input; 
-	 input [31:0] screen_in; 
-	 input [31:0] mode_in;
-	 input [31:0] score_in;  
+ 
 	 input [31:0] controller; 
 	 
 	 
@@ -97,7 +95,7 @@ data_writeReg,data_readRegA,data_readRegB);
         data_writeReg,                  // O: Data to write to for regfile
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB,                   // I: Data from port B of regfile
-		  sensor_input, sensor_output, controller, screen_in, screen_out, mode_in, score_in, score_out, mistake
+		  sensor_input, sensor_output, controller, screen_out, score_out, mistake
     );
 
 endmodule

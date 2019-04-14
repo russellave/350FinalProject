@@ -71,7 +71,7 @@ module processor(
     data_readRegA,                  // I: Data from port A of regfile
     data_readRegB                   // I: Data from port B of regfile
 	 
-	 ,sensor_input, sensor_output, controller, screen_in, screen_out, mode_in, score_in, score_out, mistake
+	 ,sensor_input, sensor_output, controller, screen_out, score_out, mistake
 	 
 	 ,latch_4_o_out, isSetX,latch_4_d_out, latch_4_ir_out,latch_3_o_out, latch_3_b_out, latch_3_ir_out
 	, Rwd, isALU, latch_2_pc_out, execute_out, execute_b_out, pc_jal, execute_pc, final_A, final_B,disabled_latch_prevclock_twice, ir_in_execute,isReady,latch_2_ir_out, latch_2_a_out, latch_2_b_out, isAddi, WE, latch_3_pc_jal_out, disabled_latch_prevclock,latch_4_pc_jal_out, flush, XM_a_bypass, XM_b_bypass, MW_b_bypass, is_jal, exception, disable_latches, enable //for debugging
@@ -95,17 +95,15 @@ module processor(
     output [31:0] data_writeReg;
     input [31:0] data_readRegA, data_readRegB;
 	 
-	 input [31:0] sensor_input; 
-	 input [31:0] screen_in; 
-	 input [31:0] mode_in;
-	 input [31:0] score_in;  
-	 input [31:0] controller; 
+	 input [31:0] sensor_input; //addr 0
+
+	 input [31:0] controller; // addr 2
 	 
 	 
-	 output [31:0] sensor_output; 
-	 output [31:0] mistake; 
-	 output [31:0] screen_out; 
-	 output [31:0] score_out; 
+	 output [31:0] sensor_output; // addr 1
+	 output [31:0] mistake; // addr 5
+	 output [31:0] screen_out; //addr 3
+	 output [31:0] score_out; //addr 4
 
     /* YOUR CODE STARTS HERE */
 	 
@@ -189,6 +187,9 @@ module processor(
 	 
 	 //latch2
 	 output[31:0] latch_2_pc_out, latch_2_ir_out, latch_2_a_out, latch_2_b_out; 
+		 
+	 
+	 
 	 latch_2 latch_2_DX(.pc_in(latch_1_pc_out), .ir_in(latch_1_ir_out), .a_in(data_readRegA), .b_in(data_readRegB), .pc_out(latch_2_pc_out), .ir_out(latch_2_ir_out), .a_out(latch_2_a_out), .b_out(latch_2_b_out), .clock(clock), .clrn(not_clear_latches), .enable(enable));
 	 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,17 +228,42 @@ module processor(
 	 //memory
 	 
 	 //control for memory
-	 wire [4:0] not_opcode_latch_3; 
-	 not not6(not_opcode_latch_3[0], latch_3_ir_out[27]);
-	 not not7(not_opcode_latch_3[1], latch_3_ir_out[28]);
-	 not not8(not_opcode_latch_3[2], latch_3_ir_out[29]);
-	 not not9(not_opcode_latch_3[3], latch_3_ir_out[30]);
-	 not not10(not_opcode_latch_3[4], latch_3_ir_out[31]);
-	 
+	 wire [31:0] not_opcode_latch_3; 
+	not not000(not_opcode_latch_3[0],latch_3_ir_out[0]);                                                            
+	not not111(not_opcode_latch_3[1],latch_3_ir_out[1]);                                                            
+	not not222(not_opcode_latch_3[2],latch_3_ir_out[2]);                                                            
+	not not333(not_opcode_latch_3[3],latch_3_ir_out[3]);                                                            
+	not not444(not_opcode_latch_3[4],latch_3_ir_out[4]);                                                            
+	not not555(not_opcode_latch_3[5],latch_3_ir_out[5]);                                                            
+	not not666(not_opcode_latch_3[6],latch_3_ir_out[6]);                                                            
+	not not777(not_opcode_latch_3[7],latch_3_ir_out[7]);                                                            
+	not not888(not_opcode_latch_3[8],latch_3_ir_out[8]);                                                            
+	not not999(not_opcode_latch_3[9],latch_3_ir_out[9]);                                                            
+	not not101010(not_opcode_latch_3[10],latch_3_ir_out[10]);                                                       
+	not not111111(not_opcode_latch_3[11],latch_3_ir_out[11]);                                                       
+	not not121212(not_opcode_latch_3[12],latch_3_ir_out[12]);                                                       
+	not not131313(not_opcode_latch_3[13],latch_3_ir_out[13]);                                                       
+	not not141414(not_opcode_latch_3[14],latch_3_ir_out[14]);                                                       
+	not not151515(not_opcode_latch_3[15],latch_3_ir_out[15]);                                                       
+	not not161616(not_opcode_latch_3[16],latch_3_ir_out[16]);                                                       
+	not not171717(not_opcode_latch_3[17],latch_3_ir_out[17]);                                                       
+	not not181818(not_opcode_latch_3[18],latch_3_ir_out[18]);                                                       
+	not not191919(not_opcode_latch_3[19],latch_3_ir_out[19]);                                                       
+	not not202020(not_opcode_latch_3[20],latch_3_ir_out[20]);                                                       
+	not not212121(not_opcode_latch_3[21],latch_3_ir_out[21]);                                                       
+	not not222222(not_opcode_latch_3[22],latch_3_ir_out[22]);                                                       
+	not not232323(not_opcode_latch_3[23],latch_3_ir_out[23]);                                                       
+	not not242424(not_opcode_latch_3[24],latch_3_ir_out[24]);                                                       
+	not not252525(not_opcode_latch_3[25],latch_3_ir_out[25]);                                                       
+	not not262626(not_opcode_latch_3[26],latch_3_ir_out[26]);                                                       
+	not not272727(not_opcode_latch_3[27],latch_3_ir_out[27]);                                                       
+	not not282828(not_opcode_latch_3[28],latch_3_ir_out[28]);                                                             
+	not not292929(not_opcode_latch_3[29],latch_3_ir_out[29]);                                                       
+	not not303030(not_opcode_latch_3[30],latch_3_ir_out[30]);                                                       
+	not not313131(not_opcode_latch_3[31],latch_3_ir_out[31]);         
 	 //wren for only  sw 
-	 and andswM(wren,not_opcode_latch_3[4],not_opcode_latch_3[3],latch_3_ir_out[29],latch_3_ir_out[28],latch_3_ir_out[27]); 
-//	 and andlwM(case_lwM,not_opcode_latch_3[4],latch_3_ir_out[30],not_opcode_latch_3[2],not_opcode_latch_3[1],not_opcode_latch_3[0]); 
-//	 or orwren(wren, case_swM, case_lwM); 
+	 
+	 and andswM(wren,not_opcode_latch_3[31],not_opcode_latch_3[30],latch_3_ir_out[29],latch_3_ir_out[28],latch_3_ir_out[27]); 
 	
 	 assign address_dmem = latch_3_o_out[11:0]; 
 	 assign data = MW_b_bypass; 
@@ -250,8 +276,47 @@ module processor(
 	 //latch4
 	 output[31:0] latch_4_o_out, latch_4_d_out, latch_4_ir_out, latch_4_pc_jal_out; 
 	 wire latch_4_exception_out, latch_4_jal_out; 
+	 //ADD MEMORY MAPPED I/O HERE. INPUTS TO SYSTEM. 
+	 wire case_lwM, case_swM, addr0, addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8; 
+	 and andlwM(case_lwM,not_opcode_latch_3[31],latch_3_ir_out[30],not_opcode_latch_3[29],not_opcode_latch_3[28],not_opcode_latch_3[27]); 
 
-	 latch_4 latch_4_MW(.ir_in(latch_3_ir_out), .ir_out(latch_4_ir_out), .o_in(latch_3_o_out), .d_in(q_dmem), .o_out(latch_4_o_out), .d_out(latch_4_d_out), .clock(clock), .clrn(not_reset),
+	 and andaddr0(addr0, not_opcode_latch_3[0],not_opcode_latch_3[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                               
+	 and andaddr1(addr1, latch_3_ir_out[0],not_opcode_latch_3[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
+	 and andaddr2(addr2, not_opcode_latch_3[0],latch_3_ir_out[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
+	 and andaddr3(addr3, latch_3_ir_out[0],latch_3_ir_out[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15],);                                                                                                                                                       
+	 and andaddr4(addr4, not_opcode_latch_3[0],not_opcode_latch_3[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
+	 and andaddr5(addr5, latch_3_ir_out[0],not_opcode_latch_3[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                       
+	 and andaddr6(addr6, not_opcode_latch_3[0],latch_3_ir_out[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                       
+	 and andaddr7(addr7, latch_3_ir_out[0],latch_3_ir_out[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);          
+	 and andaddr8(addr8, not_opcode_latch_3[0],not_opcode_latch_3[1],not_opcode_latch_3[2],latch_3_ir_out[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
+                                                                                     
+	 
+
+	 //0: sensor in, 1: sensor out, 2: controller, 3: screen out, 4: score out, 5: mistake
+	 
+	 wire case_sensor_output, case_mistake, case_screen_out, case_score_out; //work with sw 
+	 wire case_sensor_input, case_controller; //work with lw
+
+	 and and_sensor_in(case_sensor_input, case_lwM, addr0); 
+	 and and_sensor_out(case_sensor_output, wren, addr1); 
+	 and and_controller(case_controller, case_lwM, addr2); 
+	 and and_screen_out(case_screen_out, wren, addr3); 
+	 and and_score_out(case_score_out, wren, addr4);
+	 and and_mistake(case_mistake, wren, addr5); 
+	 
+	 mux_2 mux_sensor_output(.in0(32'd0), .in1(latch_3_o_out), .select(case_sensor_output), .out(sensor_output));
+	 mux_2 mux_mistake(.in0(32'd0), .in1(latch_3_o_out), .select(case_mistake), .out(mistake));
+ 	 mux_2 mux_screen_out(.in0(screen_in), .in1(latch_3_o_out), .select(case_screen_out), .out(screen_out));
+	 mux_2 mux_score_out(.in0(score_in), .in1(latch_3_o_out), .select(case_score_out), .out(score_out));
+
+	 wire [31:0]latch_4_d_in; 
+	 
+	 mux_2 mux_sensor_input(.in0(q_dmem), .in1(sensor_input), .select(case_sensor_input), .out(out_sensor_input));
+	 mux_2 mux_controller(.in0(out_sensor_input), .in1(controller), .select(case_controller), .out(latch_4_d_in));
+	 
+	 
+	 
+	 latch_4 latch_4_MW(.ir_in(latch_3_ir_out), .ir_out(latch_4_ir_out), .o_in(latch_3_o_out), .d_in(latch_4_d_in), .o_out(latch_4_o_out), .d_out(latch_4_d_out), .clock(clock), .clrn(not_reset),
 	 .jal_in(latch_3_jal_out), .jal_out(latch_4_jal_out), .exception_in(latch_3_exception_out), .exception_out(latch_4_exception_out), .pc_jal_in(latch_3_pc_jal_out), .pc_jal_out(latch_4_pc_jal_out), .enable(enable));
 
 

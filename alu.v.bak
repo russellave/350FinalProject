@@ -49,7 +49,7 @@ module alu(data_operandA, data_operandB, ctrl_ALUopcode, ctrl_shiftamt, data_res
 	or or5(overflow, t1,t2,t3,t4); 
 	wire lessThanOverFlow; 
 
-	and and11(lessThanOverFlow, data_operandA[31],not_B31,1'b1); 
+	and and11(lessThanOverFlow, data_operandA[31],not_B31,1); 
 	or or6(isLessThan, out_sub[31],lessThanOverFlow);
 
 	

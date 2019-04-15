@@ -37,19 +37,31 @@ check_dummy_input:
   addi $r10 $r0, 8 #play mode code for controller
 
 	bne $r7, $r3, splash_transition // just go back to dummy screen (should do nothing)
-  bne $r8, $r3, save_pattern
-  bne $r9, $r3, load_pattern
+  bne $r8, $r3, save_pattern_screen
+  bne $r9, $r3, load_pattern_screen
   bne $r10, $r3, play_game
 
-save_pattern:
-  #update screen
+
+save_pattern_screen: 
+#update screen
   addi $r4, $r0, 2 #update screen in processor
   sw $r4, 3($r0) #output new screen to verilog
+  addi $r3, $r0, 0 #remove previous controller input so that user can select save location
+  j save_pattern
 
+load_pattern_screen: 
+#update screen
+  addi $r4, $r0, 2 #update screen in processor
+  sw $r4, 3($r0) #output new screen to verilog
+  addi $r3, $r0, 0 #remove previous controller input so that user can select save location
+  j load_pattern
+
+save_pattern:
+  
   #controller to select where to save pattern (4 buttons)
 
   lw $r1, 0($r0)
-  lw $r3, 0($r0)
+  lw $r3, 2($r0)
   addi $r19, $r0, 0 #counter for save pattern
 
   #values to compare controller input to
@@ -62,7 +74,7 @@ save_pattern:
   and $r16, $r1, $r3 #save location chosen and there is a sensor input
   bne $r16, $r0, save_hit
 
-	j save_pattern
+  j save_pattern
 
 save_hit:
 
@@ -90,5 +102,50 @@ save_third_location:
 
 
 load_pattern:
+  
+  #controller to select which pattern to load(4 buttons)
+
+  lw $r1, 0($r0)
+  lw $r3, 2($r0)
+  addi $r19, $r0, 0 #counter for load pattern
+
+  #values to compare controller input to
+  addi $r15, $r0, 1 #back button/end saving
+  addi $r17, $r0, 2 #save first location
+  addi $r18, $r0, 4 #save second location
+  addi $r19, $r0, 8 #save third location
+
+  bne $r15, $r3, splash_transition #back button hit, go to dummy screen
+  and $r16, $r1, $r3 #save location chosen and there is a sensor input
+  bne $r16, $r0, load_hit
+
+  j save_pattern
+
+load_hit:
+
+  and $r20, $r3, $r17 #check if controller is first load location
+  and $r21, $r3, $r18
+  and $r22, $r3, $r19
+  bne $r0, $r20, load_first_location
+  bne $r0, $r21, load_second_location
+  bne $r0, $r22, load_third_location
+
+load_first_location:
+  lw $r23, 500($19)
+  addi $r19, $r19, 1 #incrememnt counter
+  j check_pattern
+
+load_second_location:
+  lw $r23, 1000($19)
+  addi $r19, $r19, 1 #incrememnt counter
+  j check_pattern
+
+load_third_location:
+  lw $r23, 1500($19)
+  addi $r19, $r19, 1 #incrememnt counter
+  j check_pattern
+
+check_pattern: 
+
 
 play_game:

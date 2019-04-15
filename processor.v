@@ -306,8 +306,8 @@ module processor(
 	 
 	 mux_2 mux_sensor_output(.in0(32'd0), .in1(latch_3_o_out), .select(case_sensor_output), .out(sensor_output));
 	 mux_2 mux_mistake(.in0(32'd0), .in1(latch_3_o_out), .select(case_mistake), .out(mistake));
- 	 mux_2 mux_screen_out(.in0(screen_in), .in1(latch_3_o_out), .select(case_screen_out), .out(screen_out));
-	 mux_2 mux_score_out(.in0(score_in), .in1(latch_3_o_out), .select(case_score_out), .out(score_out));
+ 	 mux_2 mux_screen_out(.in0(32'd0), .in1(latch_3_o_out), .select(case_screen_out), .out(screen_out));
+	 mux_2 mux_score_out(.in0(32'd0), .in1(latch_3_o_out), .select(case_score_out), .out(score_out));
 
 	 wire [31:0]latch_4_d_in; 
 	 

@@ -74,7 +74,7 @@ module processor(
 	 ,sensor_input, sensor_output, controller, screen_out, score_out, mistake
 	 
 	 ,latch_4_o_out, isSetX,latch_4_d_out, latch_4_ir_out,latch_3_o_out, latch_3_b_out, latch_3_ir_out
-	, Rwd, isALU, latch_2_pc_out, execute_out, execute_b_out, pc_jal, execute_pc, final_A, final_B,disabled_latch_prevclock_twice, ir_in_execute,isReady,latch_2_ir_out, latch_2_a_out, latch_2_b_out, isAddi, WE, latch_3_pc_jal_out, disabled_latch_prevclock,latch_4_pc_jal_out, flush, XM_a_bypass, XM_b_bypass, MW_b_bypass, is_jal, exception, disable_latches, enable //for debugging
+	, Rwd, isALU, latch_2_pc_out, execute_out, execute_b_out, pc_jal, execute_pc, final_A, final_B,disabled_latch_prevclock_twice, ir_in_execute,isReady,latch_2_ir_out, latch_2_a_out, latch_2_b_out, isAddi, WE, latch_3_pc_jal_out, disabled_latch_prevclock,latch_4_pc_jal_out, flush, XM_a_bypass, XM_b_bypass, MW_b_bypass, is_jal, exception, disable_latches, enable, case_sensor_input, case_controller, case_sensor_output, case_mistake, case_screen_out, case_score_out, case_lwM, case_swM, addr0, addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8 //for debugging
 );
     // Control signals
     input clock, reset;
@@ -277,9 +277,9 @@ module processor(
 	 output[31:0] latch_4_o_out, latch_4_d_out, latch_4_ir_out, latch_4_pc_jal_out; 
 	 wire latch_4_exception_out, latch_4_jal_out; 
 	 //ADD MEMORY MAPPED I/O HERE. INPUTS TO SYSTEM. 
-	 wire case_lwM, case_swM, addr0, addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8; 
+	 output case_lwM, case_swM, addr0, addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8; 
 	 and andlwM(case_lwM,not_opcode_latch_3[31],latch_3_ir_out[30],not_opcode_latch_3[29],not_opcode_latch_3[28],not_opcode_latch_3[27]); 
-
+	 //01000
 	 and andaddr0(addr0, not_opcode_latch_3[0],not_opcode_latch_3[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                               
 	 and andaddr1(addr1, latch_3_ir_out[0],not_opcode_latch_3[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
 	 and andaddr2(addr2, not_opcode_latch_3[0],latch_3_ir_out[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
@@ -294,8 +294,8 @@ module processor(
 
 	 //0: sensor in, 1: sensor out, 2: controller, 3: screen out, 4: score out, 5: mistake
 	 
-	 wire case_sensor_output, case_mistake, case_screen_out, case_score_out; //work with sw 
-	 wire case_sensor_input, case_controller; //work with lw
+	 output case_sensor_output, case_mistake, case_screen_out, case_score_out; //work with sw 
+	 output case_sensor_input, case_controller; //work with lw
 
 	 and and_sensor_in(case_sensor_input, case_lwM, addr0); 
 	 and and_sensor_out(case_sensor_output, wren, addr1); 
@@ -304,12 +304,12 @@ module processor(
 	 and and_score_out(case_score_out, wren, addr4);
 	 and and_mistake(case_mistake, wren, addr5); 
 	 
-	 mux_2 mux_sensor_output(.in0(32'd0), .in1(latch_3_o_out), .select(case_sensor_output), .out(sensor_output));
-	 mux_2 mux_mistake(.in0(32'd0), .in1(latch_3_o_out), .select(case_mistake), .out(mistake));
- 	 mux_2 mux_screen_out(.in0(32'd0), .in1(latch_3_o_out), .select(case_screen_out), .out(screen_out));
-	 mux_2 mux_score_out(.in0(32'd0), .in1(latch_3_o_out), .select(case_score_out), .out(score_out));
+	 mux_2 mux_sensor_output(.in0(32'd0), .in1(latch_3_b_out), .select(case_sensor_output), .out(sensor_output));
+	 mux_2 mux_mistake(.in0(32'd0), .in1(latch_3_b_out), .select(case_mistake), .out(mistake));
+ 	 mux_2 mux_screen_out(.in0(32'd0), .in1(latch_3_b_out), .select(case_screen_out), .out(screen_out));
+	 mux_2 mux_score_out(.in0(32'd0), .in1(latch_3_b_out), .select(case_score_out), .out(score_out));
 
-	 wire [31:0]latch_4_d_in; 
+	 wire [31:0]latch_4_d_in, out_sensor_input; 
 	 
 	 mux_2 mux_sensor_input(.in0(q_dmem), .in1(sensor_input), .select(case_sensor_input), .out(out_sensor_input));
 	 mux_2 mux_controller(.in0(out_sensor_input), .in1(controller), .select(case_controller), .out(latch_4_d_in));

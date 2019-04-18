@@ -119,7 +119,7 @@ load_pattern:
   and $r16, $r1, $r3 #save location chosen and there is a sensor input
   bne $r16, $r0, load_hit
 
-  j save_pattern
+  j load_pattern
 
 load_hit:
 
@@ -146,6 +146,11 @@ load_third_location:
   j check_pattern
 
 check_pattern: 
+  #check first pad
+  #check second pad
+  #check third pad
+  j load_pattern
+
 
 
 play_game:

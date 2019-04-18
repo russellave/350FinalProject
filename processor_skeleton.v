@@ -62,7 +62,7 @@ data_writeReg,data_readRegA,data_readRegB);
     regfile my_regfile(
         clock,
         ctrl_writeEnable,
-        ctrl_reset,
+        reset,
         ctrl_writeReg,
         ctrl_readRegA,
         ctrl_readRegB,

@@ -5,9 +5,9 @@ module vga_controller(iRST_n,
                       oVS,
                       b_data,
                       g_data,
-                      r_data, 
-							 in_left,
-							 screen,
+                      r_data,
+							 sensor_input, 
+							 screen, 
 							 score,
 							 mistake);
 
@@ -15,17 +15,17 @@ module vga_controller(iRST_n,
 input iRST_n;
 input iVGA_CLK;
 
-input[2:0] in_left; 
+input[31:0] screen;
+input[31:0] score;
+input[31:0] mistake;
+input[31:0] sensor_input; 
+
 output reg oBLANK_n;
 output reg oHS;
 output reg oVS;
 output [7:0] b_data;
 output [7:0] g_data;  
-output [7:0] r_data;      
-
-
-
-input [31:0] screen, score, mistake;                   
+output [7:0] r_data;                        
 ///////// ////                     
 reg [18:0] ADDR;
 reg [23:0] bgr_data;
@@ -54,40 +54,12 @@ end
 //////////////////////////
 //////INDEX addr.
 assign VGA_CLK_n = ~iVGA_CLK;
-dummy_data	dummy_data_inst (
+img_data	img_data_inst (
 	.address ( ADDR ),
 	.clock ( VGA_CLK_n ),
-	.q ( index_dummy )
-	);
-
-splash_data	splash_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index_splash )
+	.q ( index )
 	);
 	
-save_load_data	sl_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index_sl )
-	);
-	
-game_data	game_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index_game )
-	);
-	
-
-reg [7:0] holdIndex;
-always@(posedge VGA_CLK_n)
-begin
-	if((screen == 32'd0) && ((holdIndex == 7'd0)||(holdIndex == index_splash))) holdIndex <=index_splash;
-	if(screen == 32'd1) holdIndex <=index_dummy;
-	if(screen == 32'd2) holdIndex <= index_sl;
-	if(screen == 32'd4) holdIndex <= index_game; 
-end
-assign index = holdIndex; 
 /////////////////////////
 //////Add switch-input logic here
 	
@@ -115,21 +87,22 @@ begin
 	bgr_data <= bgr_data_raw;
 	x <= ADDR % 10'd640;
    y <= ADDR / 10'd640;
-
-	if((in_left[2] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
-
-	else if((in_left[1] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-
-	else if((in_left[0] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-		
-	else color_output <=bgr_data; 
+//
+//	if((in_left[2] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
+//
+//	else if((in_left[1] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+//
+//	else if((in_left[0] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+//		
+//	else 
+	color_output <=bgr_data; 
 
 	
 
 end
-assign b_data = color_output[23:16];
-assign g_data = color_output[15:8];
-assign r_data = color_output[7:0]; 
+assign b_data = bgr_data_raw[23:16];
+assign g_data = bgr_data_raw[15:8];
+assign r_data = bgr_data_raw[7:0]; 
 
 ///////////////////
 //////Delay the iHD, iVD,iDEN for one clock cycle;

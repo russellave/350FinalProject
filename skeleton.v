@@ -108,6 +108,7 @@ module skeleton(resetn,
 								 .g_data(VGA_G),
 								 .r_data(VGA_R), 
 								 .sensor_input(sensor_input),
+								 .sensor_output(sensor_output),
 								 .screen(sceen_out),
 								 .score(score_out), 
 								 .mistake(mistake));

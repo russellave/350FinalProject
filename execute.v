@@ -92,7 +92,7 @@ BR, JP, ALUinB, isReady, case1,bex_sat, isBex, case2,held_mult_out, out_mult_div
 	sll_shifter shifter1(.in(imm_extended), .out(imm_extended_shifted), .shamt(5'd0));
 	
 	//c_in is 1 because PC = PC+1+N for branching
-	cla_adder adder(.data_a(pc_in), .data_b(imm_extended_shifted), .data_out(imm_shift_plus_pc), .c_in(1'd1)); 
+	cla_adder adder(.data_a(pc_in), .data_b(imm_extended_shifted), .data_out(imm_shift_plus_pc), .c_in(1'd0)); 
 //	cla_adder adder(.data_a(32'd0), .data_b(imm_extended_shifted), .data_out(imm_shift_plus_pc), .c_in(1'd0)); 
 	
 	//BR control 

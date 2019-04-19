@@ -42,16 +42,16 @@ module bypass_logic(DX_ir, XM_ir, MW_ir, DX_a_in, DX_b_in, MW_b_in, data_write, 
 	//select correct outputs
 	
 	//00 means neither case, 01 means xm case, 10 means mw case, 11 means mw case
-	mux_4 mux_DX_a(.out(DX_a_out), .in0(DX_a_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(DX_a_select)); 
-	mux_4 mux_DX_b(.out(DX_b_out), .in0(DX_b_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(DX_b_select)); 
-	
-	
-	mux_2 mux_XM_b(.out(MW_b_out), .in0(MW_b_in), .in1(data_write), .select(XM_b_select)); 
+//	mux_4 mux_DX_a(.out(DX_a_out), .in0(DX_a_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(DX_a_select)); 
+//	mux_4 mux_DX_b(.out(DX_b_out), .in0(DX_b_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(DX_b_select)); 
+//	
+//	
+//	mux_2 mux_XM_b(.out(MW_b_out), .in0(MW_b_in), .in1(data_write), .select(XM_b_select)); 
 
 //next 3 lines are to replace previous 3 lines for NO bypassing 
-//	mux_4 mux_DX_a(.out(DX_a_out), .in0(DX_a_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(2'd0)); 
-//	mux_4 mux_DX_b(.out(DX_b_out), .in0(DX_b_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(2'd0)); 
-//	mux_2 mux_XM_b(.out(MW_b_out), .in0(MW_b_in), .in1(data_write), .select(1'd0)); 
+	mux_4 mux_DX_a(.out(DX_a_out), .in0(DX_a_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(2'd0)); 
+	mux_4 mux_DX_b(.out(DX_b_out), .in0(DX_b_in), .in1(XM_o), .in2(data_write), .in3(data_write), .select(2'd0)); 
+	mux_2 mux_XM_b(.out(MW_b_out), .in0(MW_b_in), .in1(data_write), .select(1'd0)); 
 
 	
 	endmodule

@@ -6,7 +6,10 @@ module vga_controller(iRST_n,
                       b_data,
                       g_data,
                       r_data, 
-							 in_left);
+							 in_left,
+							 screen,
+							 score,
+							 mistake);
 
 	
 input iRST_n;
@@ -18,7 +21,11 @@ output reg oHS;
 output reg oVS;
 output [7:0] b_data;
 output [7:0] g_data;  
-output [7:0] r_data;                        
+output [7:0] r_data;      
+
+
+
+input [31:0] screen, score, mistake;                   
 ///////// ////                     
 reg [18:0] ADDR;
 reg [23:0] bgr_data;
@@ -47,12 +54,40 @@ end
 //////////////////////////
 //////INDEX addr.
 assign VGA_CLK_n = ~iVGA_CLK;
-img_data	img_data_inst (
+dummy_data	dummy_data_inst (
 	.address ( ADDR ),
 	.clock ( VGA_CLK_n ),
-	.q ( index )
+	.q ( index_dummy )
+	);
+
+splash_data	splash_data_inst (
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( index_splash )
 	);
 	
+save_load_data	sl_data_inst (
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( index_sl )
+	);
+	
+game_data	game_data_inst (
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( index_game )
+	);
+	
+
+reg [7:0] holdIndex;
+always@(posedge VGA_CLK_n)
+begin
+	if((screen == 32'd0) && ((holdIndex == 7'd0)||(holdIndex == index_splash))) holdIndex <=index_splash;
+	if(screen == 32'd1) holdIndex <=index_dummy;
+	if(screen == 32'd2) holdIndex <= index_sl;
+	if(screen == 32'd4) holdIndex <= index_game; 
+end
+assign index = holdIndex; 
 /////////////////////////
 //////Add switch-input logic here
 	

@@ -106,7 +106,10 @@ module skeleton(resetn,
 								 .oVS(VGA_VS),
 								 .b_data(VGA_B),
 								 .g_data(VGA_G),
-								 .r_data(VGA_R));
+								 .r_data(VGA_R), 
+								 .screen(sceen_out),
+								 .score(score_out), 
+								 .mistake(mistake));
 	
 	
 endmodule

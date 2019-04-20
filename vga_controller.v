@@ -122,7 +122,7 @@ begin
 
 	
 	
-	if((controller_reg != 32'd0) && (screen_reg == 32'd0) screen_reg <= 32'd1;
+	if((controller_reg != 32'd0) && (screen_reg == 32'd0)) screen_reg <= 32'd1;
 	
 	
 	

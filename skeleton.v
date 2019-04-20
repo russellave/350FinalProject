@@ -57,8 +57,8 @@ module skeleton(resetn,
 	// have processor always output (SW)the screen_out, score_out, and mistake
 	
 	
-	wire [31:0] sensor_input_to_save, 
-	wire [31:0] save_signal
+	wire [31:0] sensor_input_to_save; 
+	wire [31:0] save_signal; 
 	
 	//wire [31:0] screen_out; //only first 4 bits matter. 0: splash, 1: dummy, 2: leaderboard, 3: isChangeInScreen (address 3) 
 	//wire [31:0] score_out; // (address 4)

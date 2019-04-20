@@ -9,7 +9,8 @@ module vga_controller(iRST_n,
 							 sensor_input, 
 							 sensor_output,
 							 screen, 
-							 mistake);
+							 mistake, 
+							 controller);
 
 	
 input iRST_n;
@@ -19,6 +20,8 @@ input[31:0] screen;
 input[31:0] mistake;
 input[31:0] sensor_input; 
 input[31:0] sensor_output; 
+input[31:0] controller; 
+
 output reg oBLANK_n;
 output reg oHS;
 output reg oVS;
@@ -102,7 +105,7 @@ begin
 	x <= ADDR % 10'd640;
    y <= ADDR / 10'd640;
 	
-	if((screen != 0)) screen_reg = screen; 
+	if((screen != 32'd0)) screen_reg <= screen; 
 	
 	
 	//GREEN IF HIT TARGET 

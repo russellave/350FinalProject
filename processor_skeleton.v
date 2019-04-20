@@ -95,7 +95,7 @@ data_writeReg,data_readRegA,data_readRegB);
         data_writeReg,                  // O: Data to write to for regfile
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB,                   // I: Data from port B of regfile
-		  sensor_input, sensor_output, controller, screen_out, score_out, mistake
+		  sensor_input, sensor_output, controller, screen_out, mistake
     );
 
 endmodule

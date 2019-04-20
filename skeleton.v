@@ -11,7 +11,7 @@ module skeleton(resetn,
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
-	CLOCK_50, sensor_input, sensor_output, controller);  													// 50 MHz clock
+	CLOCK_50, sensor_input, sensor_output, controller, controller_output);  													// 50 MHz clock
 		
 	////////////////////////	VGA	////////////////////////////
 	output			VGA_CLK;   				//	VGA Clock
@@ -53,6 +53,9 @@ module skeleton(resetn,
 	output [31:0] sensor_output; //only first 3 bits matter. which light to turn on (address 1)
 	
 	input [31:0] controller; //only first 3 bits matter. goes to processor (address 2)
+	output [31:0] controller_output; 
+	
+	assign controller_output = controller; 
 
 	// have processor always output (SW)the screen_out, score_out, and mistake
 	

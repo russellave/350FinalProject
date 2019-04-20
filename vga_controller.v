@@ -111,6 +111,7 @@ reg [31:0] save_signal_reg;
 
 reg [7:0] score; 
 reg [31:0] screen_reg; 
+reg [31:0] old_screen_reg; 
 reg [31:0] adjusted_sensor_out; 
 //   
 
@@ -177,51 +178,75 @@ reg [31:0] adjusted_sensor_out;
 //	end
 
 //end
+
+
+
 reg [15:0] counter_hit; 
+
 always@(posedge VGA_CLK_n) 
 begin
-	begin
+		old_screen_reg <= old_screen; 
+		if(screen_reg==32'd0) screen_reg <= old_screen_reg;
+		if(screen_reg==32'd0) screen_reg <= 32'd1; 
+
 		bgr_data <= bgr_data_raw;
 		sensor_in <= sensor_input;
+		controller_reg <= controller; 
+
 		x <= ADDR % 10'd640;
 		y <= ADDR / 10'd640;
 		// dark green: 24'h006400
 		//light green: 24'h90EE90
 		//middle green: h32CD32
-//		if((sensor_in[0] ==1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-		if((sensor_in[1] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-//		else if((sensor_in[2] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-//		else if((sensor_in[3] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-//		else if((sensor_in[5] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
-//		else if(((sensor_in[4] == 1'b1)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+		if((sensor_in[0] ==1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+		else if((sensor_in[1] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+		else if((sensor_in[2] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+		else if((sensor_in[3] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+		else if((sensor_in[5] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+		else if(((sensor_in[4] == 1'b1)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
 
-//		else if(((sensor_in[7] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
+		else if(((sensor_in[7] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
 		else if(((sensor_in[8] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
-//		else if(((sensor_in[9] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-//		else if(((sensor_in[10] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-//		else if(((sensor_in[11] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-//		else if(((sensor_in[12] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+		else if(((sensor_in[9] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
+		else if(((sensor_in[10] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
+		else if(((sensor_in[11] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+		else if(((sensor_in[12] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
 
 	
-//		else if(((sensor_in[14] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+		else if(((sensor_in[14] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
 		else if(((sensor_in[15] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-//		else if(((sensor_in[16] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-//		else if(((sensor_in[17] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-//		else if(((sensor_in[19] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
-//		else if(((sensor_in[18] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+		else if(((sensor_in[16] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
+		else if(((sensor_in[17] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
+		else if(((sensor_in[19] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+		else if(((sensor_in[18] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
 		else color_output <=bgr_data; 
 		
-	end
-	
-	
-	
+		if(screen_reg == 32'd1)
+		begin
+			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'hFFFFFF;
+			if((x > 10'd11) && (x<10'd125)&&(y<10'd381) && (y>10'd286)) color_output<=24'hFFFFFF;
+			if((x<10'd75)&&(y<10'd33)) color_output<=24'hFFFFFF;
+			if(controller_reg==32'd2) screen_reg <=32'd2;
+			if(controller_reg==32'd4) screen_reg <=32'd3;
+			if(controller_reg==32'd8) screen_reg <=32'd4;
 
+		end
+		if(screen_reg == 32'd2) 
+		begin 
+			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'h8B59FF;
+		end
 end
 
 assign b_data = color_output[23:16];
 assign g_data = color_output[15:8];
 assign r_data = color_output[7:0]; 
 assign screen = screen_reg; 
+
+wire [31:0] old_screen; 
+wire enable; 
+or or_enable(enable, screen[1], screen[2], screen[3], screen[4], screen[5], screen[6], screen[7], screen[8]); 
+register screen_reg_en(.data(screen), .clk(VGA_CLK_n), .clrn(1'b1), .ena(enable), .qout(old_screen));
+
 ///////////////////
 //////Delay the iHD, iVD,iDEN for one clock cycle;
 always@(negedge iVGA_CLK)

@@ -11,7 +11,7 @@ module skeleton(resetn,
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
-	CLOCK_50, sensor_input, sensor_output, controller, controller_output, save_signal);  													// 50 MHz clock
+	CLOCK_50, sensor_input, sensor_output, controller, controller_output, save_signal, load_signal);  													// 50 MHz clock
 		
 	////////////////////////	VGA	////////////////////////////
 	output			VGA_CLK;   				//	VGA Clock
@@ -62,6 +62,7 @@ module skeleton(resetn,
 	
 	wire [31:0] sensor_input_to_save; 
 	output [31:0] save_signal; 
+	output [31:0] load_signal; 
 	
 	//wire [31:0] screen_out; //only first 4 bits matter. 0: splash, 1: dummy, 2: leaderboard, 3: isChangeInScreen (address 3) 
 	//wire [31:0] score_out; // (address 4)
@@ -118,7 +119,8 @@ module skeleton(resetn,
 								 .sensor_output(sensor_output),
 								 .controller(controller),
 								 .sensor_input_to_save(sensor_input_to_save), 
-								 .save_signal(save_signal));
+								 .save_signal(save_signal),
+								 .load_signal(load_signal));
 								 
 
 

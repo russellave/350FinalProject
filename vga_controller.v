@@ -128,7 +128,7 @@ parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOA
 parameter LOC1 = 32'd1, LOC2 = 32'd2, LOC3 = 32'd3, NONE = 32'd0; 
 //=============Internal Variables======================
 reg   [SIZE-1:0] state;
-reg   [SIZE_CONTROLLER-1:0] state_controller; 
+reg   [SIZE_CONTROLLER-1:0] state_controller, state_controller2; 
 
 
 always@(posedge VGA_CLK_n) 
@@ -222,6 +222,7 @@ begin
 							save_signal_reg <= #1 NONE; 
 							end
 							endcase
+							end
 		 MODE_LOAD : if (controller_reg[0] == 1'b1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
@@ -230,49 +231,49 @@ begin
 						 state <=  #1  MODE_LOAD;
 						 screen_reg <= SL; 
   						 sensor_out_to_load_reg <= sensor_output; 
-						 case(state_controller)
+						 case(state_controller2)
 							NONE:  if (controller_reg[1] == 1'b1) begin
-									  state_controller <= #1 LOC1; 
+									  state_controller2 <= #1 LOC1; 
 									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller <= #1 LOC2; 
+									  state_controller2 <= #1 LOC2; 
 									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller <= #1 LOC3; 
+									  state_controller2 <= #1 LOC3; 
 									  end else begin 
-											state_controller<=NONE;
+											state_controller2<=NONE;
 											load_signal_reg <= NONE; 
 									  end
 							LOC1:	if (controller_reg[0] == 1'b1) begin
-									  state_controller <= #1 NONE; 
+									  state_controller2 <= #1 NONE; 
 									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller <= #1 LOC2; 
+									  state_controller2 <= #1 LOC2; 
 									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller <= #1 LOC3; 
+									  state_controller2 <= #1 LOC3; 
 									  end else begin 
-											state_controller<=LOC1; 
+											state_controller2<=LOC1; 
 											load_signal_reg <= LOC1; 
 									  end
 							LOC2: if (controller_reg[0] == 1'b1) begin
-									  state_controller <= #1 NONE; 
+									  state_controller2 <= #1 NONE; 
 									  end else if (controller_reg[1] == 1'b1) begin
-									  state_controller <= #1 LOC1; 
+									  state_controller2 <= #1 LOC1; 
 									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller <= #1 LOC3; 
+									  state_controller2 <= #1 LOC3; 
 									  end else begin 
-											state_controller<=LOC2; 
+											state_controller2<=LOC2; 
 											load_signal_reg <= LOC2; 
 									  end
 							LOC3: if (controller_reg[0] == 1'b1) begin
-									  state_controller <= #1 NONE; 
+									  state_controller2 <= #1 NONE; 
 									  end else if (controller_reg[1] == 1'b1) begin
-									  state_controller <= #1 LOC1; 
+									  state_controller2 <= #1 LOC1; 
 									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller <= #1 LOC2; 
+									  state_controller2 <= #1 LOC2; 
 									  end else begin 
-											state_controller<=LOC3; 
+											state_controller2<=LOC3; 
 											load_signal_reg <= LOC3; 
 									  end
 							default: begin 
-							state_controller <= #1 NONE; 
+							state_controller2 <= #1 NONE; 
 							load_signal_reg <= #1 NONE; 
 							end
 							
@@ -281,9 +282,9 @@ begin
 				
 					
 
-				end
+				
 		 default : state <=  #1  MAIN;
-		 end
+		 
 		endcase
 		
 		

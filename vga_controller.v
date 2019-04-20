@@ -8,26 +8,28 @@ module vga_controller(iRST_n,
                       r_data,
 							 sensor_input, 
 							 sensor_output,
-							 screen, 
-							 mistake, 
-							 controller);
+							 controller, 
+							 sensor_input_to_save, 
+							 save_signal);
 
 	
 input iRST_n;
 input iVGA_CLK;
-
-input[31:0] screen;
-input[31:0] mistake;
-input[31:0] sensor_input; 
-input[31:0] sensor_output; 
-input[31:0] controller; 
 
 output reg oBLANK_n;
 output reg oHS;
 output reg oVS;
 output [7:0] b_data;
 output [7:0] g_data;  
-output [7:0] r_data;                        
+output [7:0] r_data;      
+
+input [31:0] sensor_input; 
+input [31:0] sensor_output; 
+input [31:0] controller; 
+output [31:0] sensor_input_to_save; 
+output [31:0] save_signal;      
+
+             
 ///////// ////                     
 reg [18:0] ADDR;
 reg [23:0] bgr_data;
@@ -58,6 +60,8 @@ end
 //////////////////////////
 //////INDEX addr.
 assign VGA_CLK_n = ~iVGA_CLK;
+
+//DEFINE ALL MY MIF FILES HERE
 img_data	img_data_inst (
 	.address ( ADDR ),
 	.clock ( VGA_CLK_n ),
@@ -76,6 +80,8 @@ splash_data	splash_data_inst (
 wire isSplash; 
 nor norSplash(isSplash, screen_reg[0], screen_reg[1], screen_reg[2], screen_reg[3], screen_reg[4], screen_reg[5], screen_reg[6], screen_reg[7], screen_reg[8], screen_reg[9]); 
 assign index = isSplash ? index_splash: index_main; 
+
+
 //////Color table output
 img_index	img_index_inst (
 	.address ( index ),
@@ -84,15 +90,24 @@ img_index	img_index_inst (
 	);	
 //////
 //////latch valid data at falling edge;
+
+//what I have to work with 
+
+// sensor_input, sensor_output, controller, sensor_input_to_save, save_signal;     
 reg[23:0] color_output;
 reg [9:0] x; 
 reg [9:0] y;
 reg [19:0] counter; 
-reg [10:0] count_left;
-reg [10:0] count_right;
-reg [10:0] count_middle; 
+
+//from i/o
 reg [31:0] sensor_in; 
 reg [31:0] sensor_out; 
+reg [31:0] controller_reg; 
+reg [31:0] sensor_in_to_save_reg; 
+reg [31:0] save_signal_reg; 
+
+//values vga_controller calculate
+
 reg [7:0] score; 
 reg [31:0] screen_reg; 
 reg [31:0] adjusted_sensor_out; 
@@ -100,37 +115,62 @@ reg [31:0] adjusted_sensor_out;
 always@(posedge VGA_CLK_n) 
 begin
 	bgr_data <= bgr_data_raw;
+	sensor_in <= sensor_input; 
+	sensor_out <= sensor_output; 
+	controller_reg <= controller; 
 
 
+	
+	
+	if((controller_reg != 32'd0) && (screen_reg == 32'd0) screen_reg <= 32'd1;
+	
+	
+	
+	//get x and y locations of address
 	x <= ADDR % 10'd640;
    y <= ADDR / 10'd640;
-	
-	if((screen != 32'd0)) screen_reg <= screen; 
-	
 	
 	//GREEN IF HIT TARGET 
 	//pad 1: 154-193; 198-247
 	//pad 2: 296-336; 187-237
 	//pad 3: 447-489; 198-248
-	if((sensor_in[6:0] < 7'd40)&& (sensor_in[6:0] >7'd0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
+	if((screen_reg != 32'd0))
+	begin
+		if((sensor_in[6:0] < 7'd40)&& (sensor_in[6:0] >7'd0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
 
-	if((sensor_in[6:0] < 7'd80)&& (sensor_in[6:0] >7'd40) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+		if((sensor_in[6:0] < 7'd80)&& (sensor_in[6:0] >7'd40) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
 
-	if((sensor_in[6:0] < 7'd120)&& (sensor_in[6:0] >7'd80) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+		if((sensor_in[6:0] < 7'd120)&& (sensor_in[6:0] >7'd80) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
 
-	if((sensor_in[13:7] < 7'd40)&& (sensor_in[13:7] >7'd0) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+		if((sensor_in[13:7] < 7'd40)&& (sensor_in[13:7] >7'd0) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
 
-	if((sensor_in[13:7] < 7'd80)&& (sensor_in[13:7] >7'd40) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
+		if((sensor_in[13:7] < 7'd80)&& (sensor_in[13:7] >7'd40) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
 
-	if((sensor_in[13:7] < 7'd120)&& (sensor_in[13:7] >7'd80) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+		if((sensor_in[13:7] < 7'd120)&& (sensor_in[13:7] >7'd80) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+		
+		if((sensor_in[20:14] < 7'd40)&& (sensor_in[20:14] >7'd0) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
+
+		if((sensor_in[20:14] < 7'd80)&& (sensor_in[20:14] >7'd40) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+
+		if((sensor_in[20:14] < 7'd120)&& (sensor_in[20:14] >7'd80) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+		else 
+		color_output <=bgr_data; 
+	end
 	
-	if((sensor_in[20:14] < 7'd40)&& (sensor_in[20:14] >7'd0) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
-
-	if((sensor_in[20:14] < 7'd80)&& (sensor_in[20:14] >7'd40) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-
-	if((sensor_in[20:14] < 7'd120)&& (sensor_in[20:14] >7'd80) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-	else 
-	color_output <=bgr_data; 
+	if((screen_reg == 32'd1))
+	begin
+		if(controller_reg == 32'd2) screen_reg <= 2; 
+		if(controller_reg == 32'd4) screen_reg <= 2; 
+		if(controller_reg == 32'd8) screen_reg <= 3; 
+	end
+	
+	if((screen_reg == 32'd2))
+	begin 
+	end
+	
+	if((screen_reg == 32'd3))
+	begin
+	end
 
 
 end

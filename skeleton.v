@@ -56,9 +56,13 @@ module skeleton(resetn,
 
 	// have processor always output (SW)the screen_out, score_out, and mistake
 	
-	wire [31:0] screen_out; //only first 4 bits matter. 0: splash, 1: dummy, 2: leaderboard, 3: isChangeInScreen (address 3) 
-	wire [31:0] score_out; // (address 4)
-	wire [31:0] mistake; //only first bit matters. if wrong pad is hit. (address 5) 
+	
+	wire [31:0] sensor_input_to_save, 
+	wire [31:0] save_signal
+	
+	//wire [31:0] screen_out; //only first 4 bits matter. 0: splash, 1: dummy, 2: leaderboard, 3: isChangeInScreen (address 3) 
+	//wire [31:0] score_out; // (address 4)
+	//wire [31:0] mistake; //only first bit matters. if wrong pad is hit. (address 5) 
 	
 	//params of vga_controller (TO ADD)
 	//sensor_input, screen_out, score, mistake
@@ -73,7 +77,7 @@ module skeleton(resetn,
 	//assign clock = inclock;
 	
 	// your processor
-	processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, controller, screen_out, score_out, mistake,/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ debug_data_in, debug_addr);
+	//processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, controller, screen_out, score_out, mistake,/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ debug_data_in, debug_addr);
 	
 	// keyboard controller
 	PS2_Interface myps2(clock, resetn, ps2_clock, ps2_data, ps2_key_data, ps2_key_pressed, ps2_out);
@@ -109,8 +113,12 @@ module skeleton(resetn,
 								 .r_data(VGA_R), 
 								 .sensor_input(sensor_input),
 								 .sensor_output(sensor_output),
-								 .screen(sceen_out), 
-								 .mistake(mistake));
+								 .controller(controller),
+								 .sensor_input_to_save(sensor_input_to_save), 
+								 .save_signal(save_signal));
+								 
+
+
 	
 	
 endmodule

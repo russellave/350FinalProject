@@ -63,17 +63,17 @@ end
 assign VGA_CLK_n = ~iVGA_CLK;
 
 //DEFINE ALL MY MIF FILES HERE
-img_data	img_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index )
-	);
-	
-splash_data	splash_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index_splash )
-	);
+//img_data	img_data_inst (
+//	.address ( ADDR ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( index )
+//	);
+//	
+//splash_data	splash_data_inst (
+//	.address ( ADDR ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( index_splash )
+//	);
 	
 /////////////////////////
 //////Add switch-input logic here
@@ -177,9 +177,9 @@ begin
 
 
 end
-assign b_data = bgr_data_raw[23:16];
-assign g_data = bgr_data_raw[15:8];
-assign r_data = bgr_data_raw[7:0]; 
+assign b_data = color_output[23:16];
+assign g_data = color_output[15:8];
+assign r_data = color_output[7:0]; 
 assign screen = screen_reg; 
 ///////////////////
 //////Delay the iHD, iVD,iDEN for one clock cycle;

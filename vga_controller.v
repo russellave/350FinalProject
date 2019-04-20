@@ -186,8 +186,9 @@ reg [15:0] counter_hit;
 always@(posedge VGA_CLK_n) 
 begin
 		old_screen_reg <= old_screen; 
+		if(old_screen_reg==32'd0) old_screen_reg <= 32'd1; 
+
 		if(screen_reg==32'd0) screen_reg <= old_screen_reg;
-		if(screen_reg==32'd0) screen_reg <= 32'd1; 
 
 		bgr_data <= bgr_data_raw;
 		sensor_in <= sensor_input;
@@ -227,13 +228,15 @@ begin
 			if((x > 10'd11) && (x<10'd125)&&(y<10'd381) && (y>10'd286)) color_output<=24'hFFFFFF;
 			if((x<10'd75)&&(y<10'd33)) color_output<=24'hFFFFFF;
 			if(controller_reg==32'd2) screen_reg <=32'd2;
-			if(controller_reg==32'd4) screen_reg <=32'd3;
-			if(controller_reg==32'd8) screen_reg <=32'd4;
+//			if(controller_reg==32'd4) screen_reg <=32'd3;
+//			if(controller_reg==32'd8) screen_reg <=32'd4;
 
 		end
 		if(screen_reg == 32'd2) 
 		begin 
 			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'h8B59FF;
+			if(controller_reg==32'd1) screen_reg <=32'd1;
+
 		end
 end
 
@@ -245,7 +248,7 @@ assign screen = screen_reg;
 wire [31:0] old_screen; 
 wire enable; 
 or or_enable(enable, screen[1], screen[2], screen[3], screen[4], screen[5], screen[6], screen[7], screen[8]); 
-register screen_reg_en(.data(screen), .clk(VGA_CLK_n), .clrn(1'b1), .ena(enable), .qout(old_screen));
+register screen_reg_en(.data(screen), .clk(~VGA_CLK_n), .clrn(1'b1), .ena(enable), .qout(old_screen));
 
 ///////////////////
 //////Delay the iHD, iVD,iDEN for one clock cycle;

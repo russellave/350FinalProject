@@ -10,7 +10,8 @@ module vga_controller(iRST_n,
 							 sensor_output,
 							 controller, 
 							 sensor_input_to_save, 
-							 save_signal);
+							 save_signal, 
+							 load_signal);
 
 	
 input iRST_n;
@@ -27,7 +28,8 @@ input [31:0] sensor_input;
 input [31:0] sensor_output; 
 input [31:0] controller; 
 output [31:0] sensor_input_to_save; 
-output [31:0] save_signal;      
+output [31:0] save_signal;  
+output [31:0] load_signal; 
 
              
 ///////// ////                     
@@ -39,6 +41,7 @@ wire [7:0] index_main;
 wire [7:0] index_splash; 
 wire [31:0] screen; 
 wire [23:0] bgr_data_raw;
+wire [23:0] bgr_data_raw_splash;
 wire cBLANK_n,cHS,cVS,rst;
 ////
 assign rst = ~iRST_n;
@@ -66,29 +69,30 @@ assign VGA_CLK_n = ~iVGA_CLK;
 img_data	img_data_inst (
 	.address ( ADDR ),
 	.clock ( VGA_CLK_n ),
-	.q ( index )
+	.q ( index_main )
 	);
 //	
-//splash_data	splash_data_inst (
-//	.address ( ADDR ),
-//	.clock ( VGA_CLK_n ),
-//	.q ( index_splash )
-//	);
+splash_data	splash_data_inst (
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( index_splash )
+	);
 	
 /////////////////////////
 //////Add switch-input logic here
 
-wire isSplash; 
-nor norSplash(isSplash, screen[0], screen[1], screen[2], screen[3], screen[4], screen[5], screen[6], screen[7], screen[8], screen[9]); 
-//assign index = isSplash ? index_splash: index_main; 
-
 
 ////Color table output
-img_index	img_index_inst (
-	.address ( index ),
+img_index	dummy_index_inst (
+	.address ( index_main ),
 	.clock ( iVGA_CLK ),
 	.q ( bgr_data_raw)
 	);	
+	
+img_index splash_index_inst(
+	.address(index_splash), 
+	.clock(iVGA_CLK),
+	.q(bgr_data_raw_splash)); 
 //////
 //////latch valid data at falling edge;
 
@@ -106,149 +110,249 @@ reg [31:0] sensor_out;
 reg [31:0] controller_reg; 
 reg [31:0] sensor_in_to_save_reg; 
 reg [31:0] save_signal_reg; 
+reg [31:0] load_signal_reg; 
+reg [31:0] sensor_out_to_load_reg;
 
 //values vga_controller calculate
-
-reg [7:0] score; 
+ 
 reg [31:0] screen_reg; 
-reg [31:0] old_screen_reg; 
-reg [31:0] adjusted_sensor_out; 
+
 //   
-
-
-//always@(posedge VGA_CLK_n) 
-//begin
-//	bgr_data <= bgr_data_raw;
-//	sensor_in <= sensor_input; 
-//	sensor_out <= sensor_output; 
-//	controller_reg <= controller; 
-//
-//
-//	
-//	
-//	if((screen_reg == 32'd0)) 
-//	begin screen_reg <= 32'd1;
-//	end
-////	
-//	
-//	//get x and y locations of address
-//	x <= ADDR % 10'd640;
-//   y <= ADDR / 10'd640;
-//	
-	//GREEN IF HIT TARGET 
-	//pad 1: 154-193; 198-247
-	//pad 2: 296-336; 187-237
-	//pad 3: 447-489; 198-248
-	//if((screen_reg != 32'd0))
-	//begin
-//		if((sensor_in[6:0] < 7'd40)&& (sensor_in[6:0] >7'd0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
-//
-//		else if((sensor_in[6:0] < 7'd80)&& (sensor_in[6:0] >7'd40) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-//
-//		else if((sensor_in[6:0] < 7'd120)&& (sensor_in[6:0] >7'd80) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-//
-//		else if((sensor_in[13:7] < 7'd40)&& (sensor_in[13:7] >7'd0) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-//
-//		else if((sensor_in[13:7] < 7'd80)&& (sensor_in[13:7] >7'd40) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-//
-//		else if((sensor_in[13:7] < 7'd120)&& (sensor_in[13:7] >7'd80) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90;
-//		
-//		else if((sensor_in[20:14] < 7'd40)&& (sensor_in[20:14] >7'd0) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400; 
-//
-//		else if((sensor_in[20:14] < 7'd80)&& (sensor_in[20:14] >7'd40) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-//
-//		else if((sensor_in[20:14] < 7'd120)&& (sensor_in[20:14] >7'd80) && (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-//		else 
-//		color_output <=bgr_data; 
-	//end
-	
-//	if((screen_reg == 32'd1))
-//	begin
-//		if(controller_reg == 32'd2) screen_reg <= 2; 
-//		if(controller_reg == 32'd4) screen_reg <= 2; 
-//		if(controller_reg == 32'd8) screen_reg <= 3; 
-//	end
-//	
-//	if((screen_reg == 32'd2))
-//	begin 
-//	end
-//	
-//	if((screen_reg == 32'd3))
-//	begin
-//	end
-
-//end
-
-
 
 reg [15:0] counter_hit; 
 
+//fsm stuff
+parameter SIZE = 3, SIZE_CONTROLLER = 32; 
+parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens
+parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOAD = 3'b011, MODE_GAME = 3'b100; //modes
+parameter LOC1 = 32'd1, LOC2 = 32'd2, LOC3 = 32'd3, NONE = 32'd0; 
+//=============Internal Variables======================
+reg   [SIZE-1:0] state;
+reg   [SIZE_CONTROLLER-1:0] state_controller; 
+
+
 always@(posedge VGA_CLK_n) 
 begin
-		old_screen_reg <= old_screen; 
-		if(old_screen_reg==32'd0) old_screen_reg <= 32'd1; 
-
-		if(screen_reg==32'd0) screen_reg <= old_screen_reg;
-
+		screen_reg <= screen; 
 		bgr_data <= bgr_data_raw;
 		sensor_in <= sensor_input;
 		controller_reg <= controller; 
+		
+		//FSM
+		case(state)
+		 MODE_SPLASH : if (controller_reg[1] || controller_reg[2]||controller_reg[3] || controller_reg[0]) begin
+						  state <=  #1  MODE_MAIN;
+						  screen_reg <= MAIN; 
+						end else begin
+						  state <=  #1  MODE_SPLASH;
+						  screen_reg <= SPLASH; 
+						end
+		 MODE_MAIN : if (controller_reg[2] == 1'b1) begin
+						  state <=  #1  MODE_LOAD;
+						  screen_reg <= SL; 
+					end else if (controller_reg[1] == 1'b1) begin
+						  state <=  #1  MODE_SAVE;
+						  screen_reg <= SL; 
+					end else if (controller_reg[3] == 1'b1) begin
+						  state <=  #1  MODE_GAME;
+						  screen_reg <= GAME; 
+					 end else begin
+						  state <=  #1  MODE_MAIN;
+						  screen_reg <= MAIN; 
+						end
+		 MODE_GAME : if (controller_reg[0] == 1'b1) begin
+						  state <=  #1  MODE_MAIN;
+						  screen_reg <= MAIN; 
+						end else begin
+						  state <=  #1  MODE_GAME;
+						  screen_reg <= GAME; 
+						end
+						
+		 MODE_SAVE : if (controller_reg[0] == 1'b1) begin
+						  state <=  #1  MODE_MAIN;
+						  screen_reg <= MAIN; 
+						  save_signal_reg <=NONE; 
+						end else begin
+						 state <=  #1  MODE_SAVE;
+						 screen_reg <= SL; 
+  						 sensor_in_to_save_reg <= sensor_input; 
+						 case(state_controller)
+							NONE:  if (controller_reg[1] == 1'b1) begin
+									  state_controller <= #1 LOC1; 
+									  end else if (controller_reg[2] == 1'b1) begin
+									  state_controller <= #1 LOC2; 
+									  end else if (controller_reg[3] == 1'b1) begin
+									  state_controller <= #1 LOC3; 
+									  end else begin 
+											state_controller<=NONE;
+											save_signal_reg <= NONE; 
+									  end
+							LOC1:	if (controller_reg[0] == 1'b1) begin
+									  state_controller <= #1 NONE; 
+									  end else if (controller_reg[2] == 1'b1) begin
+									  state_controller <= #1 LOC2; 
+									  end else if (controller_reg[3] == 1'b1) begin
+									  state_controller <= #1 LOC3; 
+									  end else begin 
+											state_controller<=LOC1; 
+											save_signal_reg <= LOC1; 
+									  end
+							LOC2: if (controller_reg[0] == 1'b1) begin
+									  state_controller <= #1 NONE; 
+									  end else if (controller_reg[1] == 1'b1) begin
+									  state_controller <= #1 LOC1; 
+									  end else if (controller_reg[3] == 1'b1) begin
+									  state_controller <= #1 LOC3; 
+									  end else begin 
+											state_controller<=LOC2; 
+											save_signal_reg <= LOC2; 
+									  end
+							LOC3: if (controller_reg[0] == 1'b1) begin
+									  state_controller <= #1 NONE; 
+									  end else if (controller_reg[1] == 1'b1) begin
+									  state_controller <= #1 LOC1; 
+									  end else if (controller_reg[2] == 1'b1) begin
+									  state_controller <= #1 LOC2; 
+									  end else begin 
+											state_controller<=LOC3; 
+											save_signal_reg <= LOC3; 
+									  end
+							default: begin 
+							state_controller <= #1 NONE; 
+							save_signal_reg <= #1 NONE; 
+							end
+							endcase
+		 MODE_LOAD : if (controller_reg[0] == 1'b1) begin
+						  state <=  #1  MODE_MAIN;
+						  screen_reg <= MAIN; 
+						  load_signal_reg <=NONE; 
+						end else begin
+						 state <=  #1  MODE_LOAD;
+						 screen_reg <= SL; 
+  						 sensor_out_to_load_reg <= sensor_output; 
+						 case(state_controller)
+							NONE:  if (controller_reg[1] == 1'b1) begin
+									  state_controller <= #1 LOC1; 
+									  end else if (controller_reg[2] == 1'b1) begin
+									  state_controller <= #1 LOC2; 
+									  end else if (controller_reg[3] == 1'b1) begin
+									  state_controller <= #1 LOC3; 
+									  end else begin 
+											state_controller<=NONE;
+											load_signal_reg <= NONE; 
+									  end
+							LOC1:	if (controller_reg[0] == 1'b1) begin
+									  state_controller <= #1 NONE; 
+									  end else if (controller_reg[2] == 1'b1) begin
+									  state_controller <= #1 LOC2; 
+									  end else if (controller_reg[3] == 1'b1) begin
+									  state_controller <= #1 LOC3; 
+									  end else begin 
+											state_controller<=LOC1; 
+											load_signal_reg <= LOC1; 
+									  end
+							LOC2: if (controller_reg[0] == 1'b1) begin
+									  state_controller <= #1 NONE; 
+									  end else if (controller_reg[1] == 1'b1) begin
+									  state_controller <= #1 LOC1; 
+									  end else if (controller_reg[3] == 1'b1) begin
+									  state_controller <= #1 LOC3; 
+									  end else begin 
+											state_controller<=LOC2; 
+											load_signal_reg <= LOC2; 
+									  end
+							LOC3: if (controller_reg[0] == 1'b1) begin
+									  state_controller <= #1 NONE; 
+									  end else if (controller_reg[1] == 1'b1) begin
+									  state_controller <= #1 LOC1; 
+									  end else if (controller_reg[2] == 1'b1) begin
+									  state_controller <= #1 LOC2; 
+									  end else begin 
+											state_controller<=LOC3; 
+											load_signal_reg <= LOC3; 
+									  end
+							default: begin 
+							state_controller <= #1 NONE; 
+							load_signal_reg <= #1 NONE; 
+							end
+							
+							endcase	
+						end						
+				
+					
+
+				end
+		 default : state <=  #1  MAIN;
+		 end
+		endcase
+		
+		
+		//Colors
+
+
 
 		x <= ADDR % 10'd640;
 		y <= ADDR / 10'd640;
 		// dark green: 24'h006400
 		//light green: 24'h90EE90
 		//middle green: h32CD32
-		if((sensor_in[0] ==1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-		else if((sensor_in[1] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-		else if((sensor_in[2] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-		else if((sensor_in[3] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-		else if((sensor_in[5] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
-		else if(((sensor_in[4] == 1'b1)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+		if(screen_reg == SPLASH) color_output <=bgr_data_raw_splash; 
+		else begin //display hits
+			if((sensor_in[0] ==1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+			else if((sensor_in[1] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+			else if((sensor_in[2] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+			else if((sensor_in[3] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+			else if((sensor_in[5] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+			else if(((sensor_in[4] == 1'b1)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
 
-		else if(((sensor_in[7] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
-		else if(((sensor_in[8] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
-		else if(((sensor_in[9] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-		else if(((sensor_in[10] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-		else if(((sensor_in[11] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-		else if(((sensor_in[12] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+			else if(((sensor_in[7] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
+			else if(((sensor_in[8] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
+			else if(((sensor_in[9] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
+			else if(((sensor_in[10] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
+			else if(((sensor_in[11] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+			else if(((sensor_in[12] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
 
-	
-		else if(((sensor_in[14] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-		else if(((sensor_in[15] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-		else if(((sensor_in[16] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-		else if(((sensor_in[17] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-		else if(((sensor_in[19] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
-		else if(((sensor_in[18] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
-		else color_output <=bgr_data; 
 		
-		if(screen_reg == 32'd1)
-		begin
-			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'hFFFFFF;
+			else if(((sensor_in[14] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+			else if(((sensor_in[15] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+			else if(((sensor_in[16] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
+			else if(((sensor_in[17] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
+			else if(((sensor_in[19] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+			else if(((sensor_in[18] == 1'b1)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+			else color_output <=bgr_data; 
+		end
+		
+		if(screen_reg == MAIN)
+		begin //display main screen
+			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'hFFFFFF; //no scores
+			if((x > 10'd11) && (x<10'd125)&&(y<10'd381) && (y>10'd286)) color_output<=24'hFFFFFF; //no save load play
+			if((x<10'd75)&&(y<10'd33)) color_output<=24'hFFFFFF; //no back
+		end
+		
+		
+		if(screen_reg == SL) 
+		begin //display sl screen
+			if((x > 10'd82) && (x<10'd562)&&(y<10'd57) && (y>10'd0)) color_output<=24'hFFFFFF;
 			if((x > 10'd11) && (x<10'd125)&&(y<10'd381) && (y>10'd286)) color_output<=24'hFFFFFF;
-			if((x<10'd75)&&(y<10'd33)) color_output<=24'hFFFFFF;
-			if(controller_reg==32'd2) screen_reg <=32'd2;
-//			if(controller_reg==32'd4) screen_reg <=32'd3;
-//			if(controller_reg==32'd8) screen_reg <=32'd4;
 
 		end
-		if(screen_reg == 32'd2) 
-		begin 
-			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'h8B59FF;
-			if(controller_reg==32'd1) screen_reg <=32'd1;
-
+		
+		if(screen_reg == GAME)
+		begin //display game screen
+			if((x > 10'd71) && (x<10'd573)&&(y<10'd97) && (y>10'd0)) color_output<=24'hFFFFFF;
 		end
+		
+		
 end
+
+assign save_signal = save_signal_reg; 
+assign load_signal = load_signal_reg; 
+assign sensor_input_to_save = sensor_in_to_save_reg; 
 
 assign b_data = color_output[23:16];
 assign g_data = color_output[15:8];
 assign r_data = color_output[7:0]; 
-assign screen = screen_reg; 
 
-wire [31:0] old_screen; 
-wire enable; 
-or or_enable(enable, screen[1], screen[2], screen[3], screen[4], screen[5], screen[6], screen[7], screen[8]); 
-register screen_reg_en(.data(screen), .clk(~VGA_CLK_n), .clrn(1'b1), .ena(enable), .qout(old_screen));
 
 ///////////////////
 //////Delay the iHD, iVD,iDEN for one clock cycle;

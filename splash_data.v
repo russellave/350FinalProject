@@ -83,7 +83,7 @@ module splash_data (
 		altsyncram_component.address_aclr_a = "NONE",
 		altsyncram_component.clock_enable_input_a = "BYPASS",
 		altsyncram_component.clock_enable_output_a = "BYPASS",
-		altsyncram_component.init_file = "../../Users/ral30/Desktop/350FinalProject/MIF Files/Dummy_Splash_Screen.mif",
+		altsyncram_component.init_file = "../../Users/russe/Desktop/ECE350/Project/350FinalProject/MIF Files/Dummy_Splash_Screen.mif",
 		altsyncram_component.intended_device_family = "Cyclone IV E",
 		altsyncram_component.lpm_hint = "ENABLE_RUNTIME_MOD=NO",
 		altsyncram_component.lpm_type = "altsyncram",
@@ -93,7 +93,7 @@ module splash_data (
 		altsyncram_component.outdata_reg_a = "UNREGISTERED",
 		altsyncram_component.ram_block_type = "M9K",
 		altsyncram_component.widthad_a = 19,
-		altsyncram_component.width_a = 8,
+		altsyncram_component.width_a = 4,
 		altsyncram_component.width_byteena_a = 1;
 
 

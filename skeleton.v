@@ -49,7 +49,8 @@ module skeleton(resetn,
 	//Final Project 
 	
 	input [31:0] sensor_input; //only first (lsb) 24 bits matter. goes to vga controller and processor (address 0)
-
+	
+	//output processor
 	output [31:0] sensor_output; //only first 3 bits matter. which light to turn on (address 1)
 	
 	input [31:0] controller; //only first 3 bits matter. goes to processor (address 2)
@@ -57,21 +58,11 @@ module skeleton(resetn,
 	
 	assign controller_output = controller; 
 
-	// have processor always output (SW)the screen_out, score_out, and mistake
-	
-	
+	//output vga
 	wire [31:0] sensor_input_to_save; 
 	output [31:0] save_signal; 
 	output [31:0] load_signal; 
 	
-	//wire [31:0] screen_out; //only first 4 bits matter. 0: splash, 1: dummy, 2: leaderboard, 3: isChangeInScreen (address 3) 
-	//wire [31:0] score_out; // (address 4)
-	//wire [31:0] mistake; //only first bit matters. if wrong pad is hit. (address 5) 
-	
-	//params of vga_controller (TO ADD)
-	//sensor_input, screen_out, score, mistake
-	
-
 
 	// clock divider (by 5, i.e., 10 MHz)
 	pll div(CLOCK_50,inclock);
@@ -81,7 +72,7 @@ module skeleton(resetn,
 	//assign clock = inclock;
 	
 	// your processor
-	//processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, controller, screen_out, score_out, mistake,/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ debug_data_in, debug_addr);
+	processor_skeleton myprocessor(clock, ~resetn, sensor_input_to_save, sensor_output, save_signal, load_signal/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
 	
 	// keyboard controller
 	PS2_Interface myps2(clock, resetn, ps2_clock, ps2_data, ps2_key_data, ps2_key_pressed, ps2_out);
@@ -115,14 +106,14 @@ module skeleton(resetn,
 								 .b_data(VGA_B),
 								 .g_data(VGA_G),
 								 .r_data(VGA_R), 
-								 .sensor_input(sensor_input),
-								 .sensor_output(sensor_output),
-								 .controller(controller),
-								 .sensor_input_to_save(sensor_input_to_save), 
-								 .save_signal(save_signal),
-								 .load_signal(load_signal));
+								 .sensor_input(sensor_input), //input
+								 .sensor_output(sensor_output), //input
+								 .controller(controller), //input
+								 .sensor_input_to_save(sensor_input_to_save), //output to processor
+								 .save_signal(save_signal), //output to processor
+								 .load_signal(load_signal)); //output to processor
 								 
-
+									//sensor_input_to_save, save_signal, load_signal
 
 	
 	

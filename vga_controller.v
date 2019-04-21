@@ -179,40 +179,40 @@ begin
 						 case(state_controller)
 							NONE:  if (controller_reg[1] == 1'b1) begin
 									  state_controller <= #1 LOC1; 
-									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller <= #1 LOC2; 
-									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller <= #1 LOC3; 
+//									  end else if (controller_reg[2] == 1'b1) begin
+//									  state_controller <= #1 LOC2; 
+//									  end else if (controller_reg[3] == 1'b1) begin
+//									  state_controller <= #1 LOC3; 
 									  end else begin 
 											state_controller<=NONE;
 											save_signal_reg <= NONE; 
 									  end
 							LOC1:	if (controller_reg[0] == 1'b1) begin
 									  state_controller <= #1 NONE; 
-									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller <= #1 LOC2; 
-									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller <= #1 LOC3; 
+//									  end else if (controller_reg[2] == 1'b1) begin
+//									  state_controller <= #1 LOC2; 
+//									  end else if (controller_reg[3] == 1'b1) begin
+//									  state_controller <= #1 LOC3; 
 									  end else begin 
 											state_controller<=LOC1; 
 											save_signal_reg <= LOC1; 
 									  end
 							LOC2: if (controller_reg[0] == 1'b1) begin
 									  state_controller <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
-									  state_controller <= #1 LOC1; 
-									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller <= #1 LOC3; 
+//									  end else if (controller_reg[1] == 1'b1) begin
+//									  state_controller <= #1 LOC1; 
+//									  end else if (controller_reg[3] == 1'b1) begin
+//									  state_controller <= #1 LOC3; 
 									  end else begin 
 											state_controller<=LOC2; 
 											save_signal_reg <= LOC2; 
 									  end
 							LOC3: if (controller_reg[0] == 1'b1) begin
 									  state_controller <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
-									  state_controller <= #1 LOC1; 
-									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller <= #1 LOC2; 
+//									  end else if (controller_reg[1] == 1'b1) begin
+//									  state_controller <= #1 LOC1; 
+//									  end else if (controller_reg[2] == 1'b1) begin
+//									  state_controller <= #1 LOC2; 
 									  end else begin 
 											state_controller<=LOC3; 
 											save_signal_reg <= LOC3; 
@@ -244,30 +244,30 @@ begin
 									  end
 							LOC1:	if (controller_reg[0] == 1'b1) begin
 									  state_controller2 <= #1 NONE; 
-									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller2 <= #1 LOC2; 
-									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller2 <= #1 LOC3; 
+//									  end else if (controller_reg[2] == 1'b1) begin
+//									  state_controller2 <= #1 LOC2; 
+//									  end else if (controller_reg[3] == 1'b1) begin
+//									  state_controller2 <= #1 LOC3; 
 									  end else begin 
 											state_controller2<=LOC1; 
 											load_signal_reg <= LOC1; 
 									  end
 							LOC2: if (controller_reg[0] == 1'b1) begin
 									  state_controller2 <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
-									  state_controller2 <= #1 LOC1; 
-									  end else if (controller_reg[3] == 1'b1) begin
-									  state_controller2 <= #1 LOC3; 
-									  end else begin 
+//									  end else if (controller_reg[1] == 1'b1) begin
+//									  state_controller2 <= #1 LOC1; 
+//									  end else if (controller_reg[3] == 1'b1) begin
+//									  state_controller2 <= #1 LOC3; 
+//									  end else begin 
 											state_controller2<=LOC2; 
 											load_signal_reg <= LOC2; 
 									  end
 							LOC3: if (controller_reg[0] == 1'b1) begin
 									  state_controller2 <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
-									  state_controller2 <= #1 LOC1; 
-									  end else if (controller_reg[2] == 1'b1) begin
-									  state_controller2 <= #1 LOC2; 
+//									  end else if (controller_reg[1] == 1'b1) begin
+//									  state_controller2 <= #1 LOC1; 
+//									  end else if (controller_reg[2] == 1'b1) begin
+//									  state_controller2 <= #1 LOC2; 
 									  end else begin 
 											state_controller2<=LOC3; 
 											load_signal_reg <= LOC3; 
@@ -300,18 +300,19 @@ begin
 		if(screen_reg == SPLASH) color_output <=bgr_data_raw_splash; 
 		else begin //display hits
 			if((sensor_in[0] ==1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-//			else if((sensor_in[1] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-//			else if((sensor_in[2] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-//			else if((sensor_in[3] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-			else if((sensor_in[5] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
-//			else if(((sensor_in[4] == 1'b0)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
-//
+			else if((sensor_in[1] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+			else if((sensor_in[2] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+			else if((sensor_in[3] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+			else if((sensor_in[5] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;  
+			else if(((sensor_in[4] == 1'b1)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;  
+			else if(((sensor_in[6] == 1'b1)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+
 //			else if(((sensor_in[7] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
 //			else if(((sensor_in[8] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
 //			else if(((sensor_in[9] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
 //			else if(((sensor_in[10] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
 //			else if(((sensor_in[11] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-			else if(((sensor_in[12] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+//			else if(((sensor_in[12] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
 //
 //		
 //			else if(((sensor_in[14] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;

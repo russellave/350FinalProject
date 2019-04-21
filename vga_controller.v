@@ -300,26 +300,26 @@ begin
 		if(screen_reg == SPLASH) color_output <=bgr_data_raw_splash; 
 		else begin //display hits
 			if((sensor_in[0] ==1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-			else if((sensor_in[1] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-			else if((sensor_in[2] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-			else if((sensor_in[3] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
-			else if((sensor_in[5] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
-			else if(((sensor_in[4] == 1'b0)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
-
-			else if(((sensor_in[7] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
-			else if(((sensor_in[8] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
-			else if(((sensor_in[9] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-			else if(((sensor_in[10] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-			else if(((sensor_in[11] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-			else if(((sensor_in[12] == 1'b1)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-
-		
-			else if(((sensor_in[14] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-			else if(((sensor_in[15] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-			else if(((sensor_in[16] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-			else if(((sensor_in[17] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-			else if(((sensor_in[19] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
-			else if(((sensor_in[18] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+//			else if((sensor_in[1] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+//			else if((sensor_in[2] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+//			else if((sensor_in[3] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32; 
+//			else if((sensor_in[5] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+//			else if(((sensor_in[4] == 1'b0)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+//
+//			else if(((sensor_in[7] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
+//			else if(((sensor_in[8] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
+//			else if(((sensor_in[9] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
+//			else if(((sensor_in[10] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
+//			else if(((sensor_in[11] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+//			else if(((sensor_in[12] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+//
+//		
+//			else if(((sensor_in[14] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+//			else if(((sensor_in[15] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+//			else if(((sensor_in[16] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
+//			else if(((sensor_in[17] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
+//			else if(((sensor_in[19] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+//			else if(((sensor_in[18] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
 			else color_output <=bgr_data; 
 		end
 		

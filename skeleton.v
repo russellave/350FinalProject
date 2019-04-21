@@ -72,7 +72,7 @@ module skeleton(resetn,
 	//assign clock = inclock;
 	
 	// your processor
-	//processor_skeleton myprocessor(clock, ~resetn, sensor_input_to_save, sensor_output, save_signal, load_signal/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
+	processor_skeleton myprocessor(clock, ~resetn, sensor_input_to_save, sensor_output, save_signal, load_signal/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
 	
 	// keyboard controller
 	PS2_Interface myps2(clock, resetn, ps2_clock, ps2_data, ps2_key_data, ps2_key_pressed, ps2_out);

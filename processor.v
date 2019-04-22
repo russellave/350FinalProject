@@ -71,7 +71,7 @@ module processor(
     data_readRegA,                  // I: Data from port A of regfile
     data_readRegB                   // I: Data from port B of regfile
 	 
-	 ,sensor_input_to_save, sensor_output, save_signal, load_signal
+	 ,sensor_input_to_save, sensor_output, save_signal, load_signal, load_counter
 	 
 	 ,latch_4_o_out, isSetX,latch_4_d_out, latch_4_ir_out,latch_3_o_out, latch_3_b_out, latch_3_ir_out
 	, Rwd, isALU, latch_2_pc_out, execute_out, execute_b_out, pc_jal, execute_pc, final_A, final_B,disabled_latch_prevclock_twice, ir_in_execute,isReady,latch_2_ir_out, latch_2_a_out, latch_2_b_out, isAddi, WE, latch_3_pc_jal_out, disabled_latch_prevclock,latch_4_pc_jal_out, flush, XM_a_bypass, XM_b_bypass, MW_b_bypass, is_jal, exception, disable_latches, enable//for debugging
@@ -96,9 +96,10 @@ module processor(
     input [31:0] data_readRegA, data_readRegB;
 	 
 	 input [31:0] sensor_input_to_save; //address 1 dmem
-	 input [31:0] save_signal; //address 2 dmem
+	 input [31:0] save_signal; //address 4 dmem
 	 input [31:0] load_signal; //address 3 dmem
-	 output [31:0] sensor_output; //address 4 dmem
+	 output [31:0] sensor_output; //address 2 dmem
+	 input [31:0] load_counter;  //address 5
 
     /* YOUR CODE STARTS HERE */
 	 
@@ -280,7 +281,7 @@ module processor(
 	 and andaddr2(addr2, not_opcode_latch_3[0],latch_3_ir_out[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
 	 and andaddr3(addr3, latch_3_ir_out[0],latch_3_ir_out[1],not_opcode_latch_3[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15],);                                                                                                                                                       
 	 and andaddr4(addr4, not_opcode_latch_3[0],not_opcode_latch_3[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
-//	 and andaddr5(addr5, latch_3_ir_out[0],not_opcode_latch_3[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                       
+	 and andaddr5(addr5, latch_3_ir_out[0],not_opcode_latch_3[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                       
 //	 and andaddr6(addr6, not_opcode_latch_3[0],latch_3_ir_out[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                       
 //	 and andaddr7(addr7, latch_3_ir_out[0],latch_3_ir_out[1],latch_3_ir_out[2],not_opcode_latch_3[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);          
 //	 and andaddr8(addr8, not_opcode_latch_3[0],not_opcode_latch_3[1],not_opcode_latch_3[2],latch_3_ir_out[3],not_opcode_latch_3[4],not_opcode_latch_3[5],not_opcode_latch_3[6],not_opcode_latch_3[7],not_opcode_latch_3[8],not_opcode_latch_3[9],not_opcode_latch_3[10],not_opcode_latch_3[11],not_opcode_latch_3[12],not_opcode_latch_3[13],not_opcode_latch_3[14],not_opcode_latch_3[15]);                                                                                                                                                   
@@ -291,20 +292,22 @@ module processor(
 //	 load_signal; //address 3 dmem input
 //	 sensor_output; //address 4 dmem output
 	 
-	 wire case_sensor_in_to_save, case_sensor_out, case_load_signal, case_save_signal; 
+	 wire case_sensor_in_to_save, case_sensor_out, case_load_signal, case_save_signal, case_load_counter; 
 	 and and_sensor_in_to_save(case_sensor_in_to_save, case_lwM, addr1);
 	 and and_sensor_out(case_sensor_out, wren, addr2); 
 	 and and_load_signal(case_load_signal, case_lwM,addr3); 
 	 and and_save_signal(case_save_signal, case_lwM, addr4);
+	 and and_load_counter(case_load_counter, case_lwM, addr5);
 
 	 
 	 mux_2 mux_sensor_output(.in0(32'd0), .in1(latch_3_b_out), .select(case_sensor_out), .out(sensor_output));
 
-	 wire [31:0]latch_4_d_in, out_sensor_input, out_save_signal; 
+	 wire [31:0]latch_4_d_in, out_sensor_input, out_save_signal, out_load_signal; 
 	 
 	 mux_2 mux_sensor_input(.in0(q_dmem), .in1(sensor_input_to_save), .select(case_sensor_in_to_save), .out(out_sensor_input));
 	 mux_2 mux_save_signal(.in0(out_sensor_input), .in1(save_signal), .select(case_save_signal), .out(out_save_signal));
-	 mux_2 mux_load_signal(.in0(out_save_signal), .in1(load_signal), .select(case_load_signal), .out(latch_4_d_in));
+	 mux_2 mux_load_signal(.in0(out_save_signal), .in1(load_signal), .select(case_load_signal), .out(out_load_signal));
+	 mux_2 mux_counter(.in0(out_load_signal), .in1(load_counter), .select(case_load_counter), .out(latch_4_d_in));
 	 
 	 
 	 

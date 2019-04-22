@@ -64,6 +64,7 @@ module skeleton(resetn,
 	output [31:0] save_signal; 
 	output [31:0] load_signal; 
 	output [2:0] state_load_out; 
+	wire [31:0] counter; 
 
 	// clock divider (by 5, i.e., 10 MHz)
 	pll div(CLOCK_50,inclock);
@@ -73,7 +74,7 @@ module skeleton(resetn,
 	//assign clock = inclock;
 	
 	// your processor
-	processor_skeleton myprocessor(clock, ~resetn, sensor_input_to_save, sensor_output, save_signal, load_signal/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
+	processor_skeleton myprocessor(clock, ~resetn, sensor_input_to_save, sensor_output, save_signal, load_signal, counter/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
 	
 	
 	// keyboard controller
@@ -114,7 +115,8 @@ module skeleton(resetn,
 								 .sensor_input_to_save(sensor_input_to_save), //output to processor
 								 .save_signal(save_signal), //output to processor
 								 .load_signal(load_signal), 
-								 .state_load_out(state_load_out)); //output to processor
+								 .state_load_out(state_load_out), 
+								 .load_counter(counter)); //output to processor
 								 
 
 	

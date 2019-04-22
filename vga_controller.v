@@ -11,7 +11,7 @@ module vga_controller(iRST_n,
 							 controller, 
 							 sensor_input_to_save, 
 							 save_signal, 
-							 load_signal, state_load_out);
+							 load_signal, state_load_out, load_counter);
 
 	
 input iRST_n;
@@ -31,6 +31,7 @@ output [31:0] sensor_input_to_save;
 output [31:0] save_signal;  
 output [31:0] load_signal; 
 output [2:0] state_load_out; 
+output [31:0] load_counter; 
 
              
 ///////// ////                     
@@ -117,7 +118,7 @@ reg [31:0] sensor_out_to_load_reg;
 //values vga_controller calculate
  
 reg [31:0] screen_reg; 
-
+reg [31:0] load_counter_reg; 
 //   
 
 reg [15:0] counter_hit; 
@@ -127,7 +128,7 @@ parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3;
 parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens (not states but just useful)
 parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOAD = 3'b011, MODE_GAME = 3'b100; //modes
 parameter LOC1 = 32'd1, LOC2 = 32'd2, LOC3 = 32'd3, NONE = 32'd0;  //save locations
-parameter START = 3'b001, WAIT1 = 3'b010, WAIT2 = 3'b011, WAIT3 = 3'b100; 
+parameter START = 3'b000, WAIT1 = 3'b001, WAIT2 = 3'b010, WAIT3 = 3'b011; 
 parameter PAD1 = 32'd1, PAD2 = 32'd2, PAD3 = 32'd3; 
 //=============Internal Variables======================
 reg   [SIZE-1:0] state;
@@ -256,29 +257,29 @@ begin
 											load_signal_reg <= LOC1; 
 											state_controller2<=LOC1; 
 											case(state_load)
-												 START : if (sensor_output_adjusted == PAD1) begin
+												 START : if (sensor_out_to_load_reg == PAD1) begin
 																 state_load <=  #1  WAIT1;
-															end else if (sensor_output_adjusted == PAD2) begin
+															end else if (sensor_out_to_load_reg == PAD2) begin
 																 state_load <=  #1  WAIT2;
-															end else if (sensor_output_adjusted == PAD3) begin
+															end else if (sensor_out_to_load_reg == PAD3) begin
 																 state_load <=  #1  WAIT3;
 																 
 															end else begin
 																  state_load <=  #1  START;
 																end
-												 WAIT1 : if(sensor_input != 32'd0) begin
+												 WAIT1 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT1;
 																end
-												 WAIT2 : if(sensor_input != 32'd0) begin
+												 WAIT2 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT2;
 																end
-												 WAIT3 : if(sensor_input != 32'd0) begin
+												 WAIT3 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
@@ -307,19 +308,19 @@ begin
 															end else begin
 																  state_load <=  #1  START;
 																end
-												 WAIT1 : if(sensor_input != 32'd0) begin
+												 WAIT1 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT1;
 																end
-												 WAIT2 : if(sensor_input != 32'd0) begin
+												 WAIT2 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT2;
 																end
-												 WAIT3 : if(sensor_input != 32'd0) begin
+												 WAIT3 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
@@ -349,19 +350,19 @@ begin
 															end else begin
 																  state_load <=  #1  START;
 																end
-												 WAIT1 : if(sensor_input != 32'd0) begin
+												 WAIT1 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT1;
 																end
-												 WAIT2 : if(sensor_input != 32'd0) begin
+												 WAIT2 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT2;
 																end
-												 WAIT3 : if(sensor_input != 32'd0) begin
+												 WAIT3 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
 															  end else begin
 															  	  load_signal_reg <= NONE;
@@ -452,6 +453,7 @@ assign state_load_out = state_load;
 assign b_data = color_output[23:16];
 assign g_data = color_output[15:8];
 assign r_data = color_output[7:0]; 
+assign load_counter = load_counter_reg; 
 
 
 ///////////////////

@@ -9,7 +9,7 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module processor_skeleton(clock, reset,sensor_input_to_save, sensor_output, save_signal, load_signal //rest is debugging
+module processor_skeleton(clock, reset,sensor_input_to_save, sensor_output, save_signal, load_signal, counter //rest is debugging
 ,address_imem,q_imem,address_dmem,
 data,wren,q_dmem,ctrl_writeEnable,ctrl_writeReg,ctrl_readRegA,ctrl_readRegB,
 data_writeReg,data_readRegA,data_readRegB);
@@ -20,6 +20,7 @@ data_writeReg,data_readRegA,data_readRegB);
 	 input [31:0] save_signal; //address 2 dmem
 	 input [31:0] load_signal; //address 3 dmem
 	 output [31:0] sensor_output; //address 4 dmem
+	 input [31:0] counter; //addrsss 5 dmem
 	 
 
     /** IMEM **/
@@ -90,7 +91,7 @@ data_writeReg,data_readRegA,data_readRegB);
         data_writeReg,                  // O: Data to write to for regfile
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB,                   // I: Data from port B of regfile
-		  sensor_input_to_save, sensor_output, save_signal, load_signal
+		  sensor_input_to_save, sensor_output, save_signal, load_signal,counter
     );
 
 endmodule

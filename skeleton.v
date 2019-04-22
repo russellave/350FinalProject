@@ -11,7 +11,7 @@ module skeleton(resetn,
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
-	CLOCK_50, sensor_input, sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out, state_load_out);  													// 50 MHz clock
+	CLOCK_50, sensor_input, final_sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out, state_load_out, counter);  													// 50 MHz clock
 		
 	////////////////////////	VGA	////////////////////////////
 	output			VGA_CLK;   				//	VGA Clock
@@ -52,7 +52,7 @@ module skeleton(resetn,
 	output [31:0] sensor_input_out; 
 	assign sensor_input_out = sensor_input; 
 	//output processor
-	output [31:0] sensor_output; //only first 3 bits matter. which light to turn on (address 1)
+	output [31:0] final_sensor_output; //only first 3 bits matter. which light to turn on (address 1)
 	
 	input [31:0] controller; //only first 3 bits matter. goes to processor (address 2)
 	output [31:0] controller_output; 
@@ -64,8 +64,9 @@ module skeleton(resetn,
 	output [31:0] save_signal; 
 	output [31:0] load_signal; 
 	output [2:0] state_load_out; 
-	wire [31:0] counter; 
-
+	output [31:0] counter; 
+	wire [31:0] sensor_output; 
+	wire [31:0] adjusted_sensor_output; 
 	// clock divider (by 5, i.e., 10 MHz)
 	pll div(CLOCK_50,inclock);
 	assign clock = CLOCK_50;
@@ -74,7 +75,7 @@ module skeleton(resetn,
 	//assign clock = inclock;
 	
 	// your processor
-	processor_skeleton myprocessor(clock, ~resetn, sensor_input_to_save, sensor_output, save_signal, load_signal, counter/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
+	processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, save_signal, load_signal, counter/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
 	
 	
 	// keyboard controller
@@ -97,6 +98,8 @@ module skeleton(resetn,
 	
 	// some LEDs that you could use for debugging if you wanted
 	assign leds = 8'b00101011;
+	
+	assign adjusted_sensor_output = sensor_output; //add logic here! 
 		
 	// VGA
 	Reset_Delay			r0	(.iCLK(CLOCK_50),.oRESET(DLY_RST)	);
@@ -110,13 +113,14 @@ module skeleton(resetn,
 								 .g_data(VGA_G),
 								 .r_data(VGA_R), 
 								 .sensor_input(sensor_input), //input
-								 .sensor_output_adjusted(sensor_output), //input
+								 .sensor_output_adjusted(adjusted_sensor_output), //input
 								 .controller(controller), //input
 								 .sensor_input_to_save(sensor_input_to_save), //output to processor
 								 .save_signal(save_signal), //output to processor
 								 .load_signal(load_signal), 
 								 .state_load_out(state_load_out), 
-								 .load_counter(counter)); //output to processor
+								 .load_counter(counter), //output to processor
+								 .final_out_dummy(final_sensor_output)); 
 								 
 
 	

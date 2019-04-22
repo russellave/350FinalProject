@@ -11,7 +11,7 @@ module vga_controller(iRST_n,
 							 controller, 
 							 sensor_input_to_save, 
 							 save_signal, 
-							 load_signal, state_load_out, load_counter);
+							 load_signal, state_load_out, load_counter, final_out_dummy);
 
 	
 input iRST_n;
@@ -32,6 +32,7 @@ output [31:0] save_signal;
 output [31:0] load_signal; 
 output [2:0] state_load_out; 
 output [31:0] load_counter; 
+output [31:0] final_out_dummy; 
 
              
 ///////// ////                     
@@ -119,6 +120,7 @@ reg [31:0] sensor_out_to_load_reg;  //when I get an output and I want to save to
  
 reg [31:0] screen_reg; 
 reg [31:0] counter_reg; 
+reg [31:0] counter_increment; 
 //   
 
 reg [15:0] counter_hit; 
@@ -145,7 +147,37 @@ begin
 		bgr_data <= bgr_data_raw;
 		sensor_in <= sensor_input;
 		controller_reg <= controller; 
-		
+				 //move this outside the mode fsm? just always store the output depending if there's a change or not
+		 case(state_output)
+			 CASE_NEW_OUTPUT : if (sensor_output_adjusted == PAD1) begin
+							  state_output <=  #1  CASE_PAD1_OUTPUT;
+						  end else if(sensor_output_adjusted == PAD2) begin
+							  state_output <=  #1  CASE_PAD2_OUTPUT;
+						  end else if(sensor_output_adjusted == PAD3) begin
+							  state_output <=  #1  CASE_PAD3_OUTPUT;
+						  end else begin
+							  state <=  #1  CASE_NEW_OUTPUT;
+							end
+			 CASE_PAD1_OUTPUT : if (sensor_in != NO_INPUT) begin
+							  state_output <=  #1  CASE_NEW_OUTPUT;
+							end else begin
+						  sensor_out_to_load_reg <= PAD1; 										  
+						  state_output <=  #1 CASE_PAD1_OUTPUT;
+							end
+			CASE_PAD2_OUTPUT : if (sensor_in != NO_INPUT) begin
+						state_output <=  #1  CASE_NEW_OUTPUT;
+						end else begin
+						sensor_out_to_load_reg <= PAD2; 										  
+						state_output <=  #1 CASE_PAD2_OUTPUT;
+				end
+			 CASE_PAD3_OUTPUT : if (sensor_in != NO_INPUT) begin
+						state_output <=  #1  CASE_NEW_OUTPUT;
+						end else begin
+						sensor_out_to_load_reg <= PAD3; 										  
+						state_output <=  #1 CASE_PAD3_OUTPUT;
+				end
+			 default : state_output <=  #1  CASE_NEW_OUTPUT;
+		 endcase
 		//FSM
 		case(state)
 		 MODE_SPLASH : if (controller_reg[1] || controller_reg[2]||controller_reg[3] || controller_reg[0]) begin
@@ -235,51 +267,29 @@ begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						  load_signal_reg <=NONE; 
+						   sensor_out_to_load_reg <= NONE; 
 						end else begin
 						 state <=  #1  MODE_LOAD;
 						 screen_reg <= SL; 
-						 //move this outside the mode fsm? just always store the output depending if there's a change or not
-						 case(state_output)
-							 CASE_NEW_OUTPUT : if (sensor_output_adjusted == PAD1) begin
-											  state_output <=  #1  CASE_PAD1_OUTPUT;
-										  end else if(sensor_output_adjusted == PAD2) begin
-											  state_output <=  #1  CASE_PAD2_OUTPUT;
-										  end else if(sensor_output_adjusted == PAD3) begin
-											  state_output <=  #1  CASE_PAD3_OUTPUT;
-										  end else begin
-											  state <=  #1  CASE_NEW_OUTPUT;
-											end
-							 CASE_PAD1_OUTPUT : if (SENSOR_INPUT != NO_INPUT) begin
-											  state <=  #1  CASE_NEW_OUTPUT;
-											end else begin
-										  sensor_out_to_load_reg <= PAD1; 										  
-										  state <=  #1 CASE_PAD1_OUOTPUT;
-											end
-							CASE_PAD2_OUTPUT : if (SENSOR_INPUT != NO_INPUT) begin
-										state <=  #1  CASE_NEW_OUTPUT;
-										end else begin
-										sensor_out_to_load_reg <= PAD2; 										  
-										state <=  #1 CASE_PAD2_OUOTPUT;
-								end
-							 CASE_PAD3_OUTPUT : if (SENSOR_INPUT != NO_INPUT) begin
-										state <=  #1  CASE_NEW_OUTPUT;
-										end else begin
-										sensor_out_to_load_reg <= PAD3; 										  
-										state <=  #1 CASE_PAD3_OUOTPUT;
-								end
-							 default : state <=  #1  CASE_NEW_OUTPUT;
-						 endcase
+
 						  
 						 case(state_controller2)
 							NONE:  if (controller_reg[1] == 1'b1) begin
 									  state_controller2 <= #1 LOC1; 
+									  counter_increment <= 32'd0; 
+
 									  end else if (controller_reg[2] == 1'b1) begin
 									  state_controller2 <= #1 LOC2; 
+									  counter_increment <= 32'd0; 
+
 									  end else if (controller_reg[3] == 1'b1) begin
 									  state_controller2 <= #1 LOC3; 
+									  counter_increment <= 32'd0; 
+
 									  end else begin 
 											state_controller2<=NONE;
 											load_signal_reg <= NONE; 
+											counter_increment <= 32'd0; 
 									  end
 							LOC1:	if (controller_reg[0] == 1'b1) begin
 									  state_controller2 <= #1 NONE; 
@@ -292,14 +302,15 @@ begin
 											load_signal_reg <= LOC1; 
 											state_controller2<=LOC1; 
 											case(state_load)
-												 START : if (sensor_out_to_load_reg == PAD1) begin
+												 START : if (sensor_out_to_load_reg == PAD1 || sensor_out_to_load_reg == PAD2 || sensor_out_to_load_reg == PAD3) begin
 																 state_load <=  #1  WAIT;
 															end else begin
 																  state_load <=  #1  START;
 																end
 												 WAIT: if(sensor_input != NO_INPUT) begin
 																  state_load <=  #1  START;
-																  counter_reg <= counter_reg +1;
+																  counter_increment <= counter_increment + 32'd1;
+																  counter_reg <= counter_reg + counter_increment; 
 
 															  end else begin
 																  state_load <=  #1  WAIT;
@@ -318,14 +329,16 @@ begin
 											state_controller2<=LOC2; 
 											counter_reg <= 32'd1000; 
 											case(state_load)
-												 START : if (sensor_out_to_load_reg == PAD1) begin
+												 START : if (sensor_out_to_load_reg == PAD1 || sensor_out_to_load_reg == PAD2 || sensor_out_to_load_reg == PAD3) begin
 																 state_load <=  #1  WAIT;
 															end else begin
 																  state_load <=  #1  START;
 																end
 												 WAIT: if(sensor_input != NO_INPUT) begin
 																  state_load <=  #1  START;
-																  counter_reg <= counter_reg +1;
+																  counter_increment <= counter_increment + 32'd1;
+																  counter_reg <= counter_reg + counter_increment; 
+
 
 															  end else begin
 																  state_load <=  #1  WAIT;
@@ -345,14 +358,15 @@ begin
 											state_controller2<=LOC3; 
 											counter_reg <= 32'd1500; 
 											case(state_load)
-												 START : if (sensor_out_to_load_reg == PAD1) begin
+												 START : if (sensor_out_to_load_reg == PAD1 || sensor_out_to_load_reg == PAD2 || sensor_out_to_load_reg == PAD3) begin
 																 state_load <=  #1  WAIT;
 															end else begin
 																  state_load <=  #1  START;
 																end
 												 WAIT: if(sensor_input != NO_INPUT) begin
 																  state_load <=  #1  START;
-																  counter_reg <= counter_reg +1;
+																  counter_increment <= counter_increment + 32'd1;
+																  counter_reg <= counter_reg + counter_increment; 
 
 															  end else begin
 																  state_load <=  #1  WAIT;
@@ -387,28 +401,24 @@ begin
 		//middle green: h32CD32
 		if(screen_reg == SPLASH) color_output <=bgr_data_raw_splash; 
 		else begin //display hits
-			if((sensor_in[0] ==1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
+			if(((sensor_in[4] == 1'b0)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+			else if((sensor_in[0] ==1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
 			else if((sensor_in[1] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
 			else if((sensor_in[2] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
 			else if((sensor_in[3] == 1'b0) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90; 
-//			else if((sensor_in[5] == 1'b1) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;  
-			else if(((sensor_in[4] == 1'b0)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
-//			else if(((sensor_in[6] == 1'b1)) && (x > 10'd154) && (x<10'd193) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;  
+			
+			else if(((sensor_in[9] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
+			else if((sensor_in[5] == 1'b0) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90;  
+			else if(((sensor_in[6] == 1'b0)) && (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90;  
+			else if(((sensor_in[7] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
+			else if(((sensor_in[8] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
 
-//			else if(((sensor_in[7] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
-//			else if(((sensor_in[8] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h90EE90; 
-//			else if(((sensor_in[9] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-//			else if(((sensor_in[10] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h32CD32; 
-//			else if(((sensor_in[11] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-//			else if(((sensor_in[12] == 1'b0)) &&  (x > 10'd296) && (x<10'd336) && (y<10'd237) && (y>10'd187)) color_output <= 24'h006400; 
-//
-//		
-//			else if(((sensor_in[14] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-//			else if(((sensor_in[15] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
-//			else if(((sensor_in[16] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-//			else if(((sensor_in[17] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h32CD32;
-//			else if(((sensor_in[19] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
-//			else if(((sensor_in[18] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+			else if(((sensor_in[14] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h006400;
+			else if(((sensor_in[10] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+			else if(((sensor_in[11] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+			else if(((sensor_in[12] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+			else if(((sensor_in[13] == 1'b0)) &&  (x > 10'd447) && (x<10'd489) && (y<10'd247) && (y>10'd198)) color_output <= 24'h90EE90;
+			
 			else color_output <=bgr_data; 
 		end
 		
@@ -443,7 +453,7 @@ assign b_data = color_output[23:16];
 assign g_data = color_output[15:8];
 assign r_data = color_output[7:0]; 
 assign load_counter = counter_reg; 
-
+assign final_out_dummy = sensor_out_to_load_reg; 
 
 ///////////////////
 //////Delay the iHD, iVD,iDEN for one clock cycle;

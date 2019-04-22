@@ -19,7 +19,7 @@ data_writeReg,data_readRegA,data_readRegB);
 	 input [31:0] sensor_input_to_save; //address 1 dmem
 	 input [31:0] save_signal; //address 2 dmem
 	 input [31:0] load_signal; //address 3 dmem
-	 output [31:0] sensor_output; //address 4 dmem
+	 output [31:0] sensor_output; //address 2 dmem
 	 input [31:0] counter; //addrsss 5 dmem
 	 
 

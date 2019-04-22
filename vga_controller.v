@@ -7,11 +7,11 @@ module vga_controller(iRST_n,
                       g_data,
                       r_data,
 							 sensor_input, 
-							 sensor_output,
+							 sensor_output_adjusted,
 							 controller, 
 							 sensor_input_to_save, 
 							 save_signal, 
-							 load_signal);
+							 load_signal, state_load_out);
 
 	
 input iRST_n;
@@ -25,11 +25,12 @@ output [7:0] g_data;
 output [7:0] r_data;      
 
 input [31:0] sensor_input; 
-input [31:0] sensor_output; 
+input [31:0] sensor_output_adjusted; 
 input [31:0] controller; 
 output [31:0] sensor_input_to_save; 
 output [31:0] save_signal;  
 output [31:0] load_signal; 
+output [2:0] state_load_out; 
 
              
 ///////// ////                     
@@ -98,7 +99,7 @@ img_index splash_index_inst(
 
 //what I have to work with 
 
-// sensor_input, sensor_output, controller, sensor_input_to_save, save_signal;     
+// sensor_input, sensor_output_adjusted, controller, sensor_input_to_save, save_signal;     
 reg[23:0] color_output;
 reg [9:0] x; 
 reg [9:0] y;
@@ -126,7 +127,8 @@ parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3;
 parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens (not states but just useful)
 parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOAD = 3'b011, MODE_GAME = 3'b100; //modes
 parameter LOC1 = 32'd1, LOC2 = 32'd2, LOC3 = 32'd3, NONE = 32'd0;  //save locations
-parameter LOAD_SIG = 3'b001, WAIT = 3'b010; 
+parameter START = 3'b001, WAIT1 = 3'b010, WAIT2 = 3'b011, WAIT3 = 3'b100; 
+parameter PAD1 = 32'd1, PAD2 = 32'd2, PAD3 = 32'd3; 
 //=============Internal Variables======================
 reg   [SIZE-1:0] state;
 reg   [SIZE_CONTROLLER-1:0] state_controller, state_controller2; 
@@ -232,7 +234,7 @@ begin
 						end else begin
 						 state <=  #1  MODE_LOAD;
 						 screen_reg <= SL; 
-  						 sensor_out_to_load_reg <= sensor_output; 
+  						 sensor_out_to_load_reg <= sensor_output_adjusted; 
 						 case(state_controller2)
 							NONE:  if (controller_reg[1] == 1'b1) begin
 									  state_controller2 <= #1 LOC1; 
@@ -254,19 +256,35 @@ begin
 											load_signal_reg <= LOC1; 
 											state_controller2<=LOC1; 
 											case(state_load)
-												 LOAD_SIG : if (sensor_output != 32'd0 && sensor_input ==32'd0) begin
-																 state_load <=  #1  WAIT;
-																 load_signal_reg <= NONE;
-																end else begin
-																  state_load <=  #1  LOAD_SIG;
+												 START : if (sensor_output_adjusted == PAD1) begin
+																 state_load <=  #1  WAIT1;
+															end else if (sensor_output_adjusted == PAD2) begin
+																 state_load <=  #1  WAIT2;
+															end else if (sensor_output_adjusted == PAD3) begin
+																 state_load <=  #1  WAIT3;
+																 
+															end else begin
+																  state_load <=  #1  START;
 																end
-												 WAIT : if(sensor_output != 32'd0 && sensor_input ==32'd0) begin
-																  state_load <=  #1  WAIT;
-																 load_signal_reg <= NONE;
+												 WAIT1 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
 															  end else begin
-																  state_load <=  #1  LOAD_SIG;
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT1;
 																end
-												 default : state_load <=  #1  LOAD_SIG;
+												 WAIT2 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
+															  end else begin
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT2;
+																end
+												 WAIT3 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
+															  end else begin
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT3;
+																end
+												 default : state_load <=  #1  START;
 											 endcase
 									  end
 							LOC2: if (controller_reg[0] == 1'b1) begin
@@ -279,19 +297,35 @@ begin
 											load_signal_reg <= LOC2; 
 											state_controller2<=LOC2; 
 											case(state_load)
-												 LOAD_SIG : if (sensor_output != 32'd0 && sensor_input ==32'd0) begin
-																 state_load <=  #1  WAIT;
-																 load_signal_reg <= NONE;
-																end else begin
-																  state_load <=  #1  LOAD_SIG;
+												 START : if (sensor_output_adjusted == PAD1) begin
+																 state_load <=  #1  WAIT1;
+															end else if (sensor_output_adjusted == PAD2) begin
+																 state_load <=  #1  WAIT2;
+															end else if (sensor_output_adjusted == PAD3) begin
+																 state_load <=  #1  WAIT3;
+																 
+															end else begin
+																  state_load <=  #1  START;
 																end
-												 WAIT : if(sensor_output != 32'd0 && sensor_input ==32'd0) begin
-																  state_load <=  #1  WAIT;
-																 load_signal_reg <= NONE;
+												 WAIT1 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
 															  end else begin
-																  state_load <=  #1  LOAD_SIG;
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT1;
 																end
-												 default : state_load <=  #1  LOAD_SIG;
+												 WAIT2 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
+															  end else begin
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT2;
+																end
+												 WAIT3 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
+															  end else begin
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT3;
+																end
+												 default : state_load <=  #1  START;
 											 endcase
 									  end
 									  
@@ -305,19 +339,35 @@ begin
 											load_signal_reg <= LOC3; 
 											state_controller2<=LOC3; 
 											case(state_load)
-												 LOAD_SIG : if (sensor_output != 32'd0 && sensor_input ==32'd0) begin
-																 state_load <=  #1  WAIT;
-																 load_signal_reg <= NONE;
-																end else begin
-																  state_load <=  #1  LOAD_SIG;
+												 START : if (sensor_output_adjusted == PAD1) begin
+																 state_load <=  #1  WAIT1;
+															end else if (sensor_output_adjusted == PAD2) begin
+																 state_load <=  #1  WAIT2;
+															end else if (sensor_output_adjusted == PAD3) begin
+																 state_load <=  #1  WAIT3;
+																 
+															end else begin
+																  state_load <=  #1  START;
 																end
-												 WAIT : if(sensor_output != 32'd0 && sensor_input ==32'd0) begin
-																  state_load <=  #1  WAIT;
-																 load_signal_reg <= NONE;
+												 WAIT1 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
 															  end else begin
-																  state_load <=  #1  LOAD_SIG;
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT1;
 																end
-												 default : state <=  #1  LOAD_SIG;
+												 WAIT2 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
+															  end else begin
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT2;
+																end
+												 WAIT3 : if(sensor_input != 32'd0) begin
+																  state_load <=  #1  START;
+															  end else begin
+															  	  load_signal_reg <= NONE;
+																  state_load <=  #1  WAIT3;
+																end
+												 default : state_load <=  #1  START;
 											 endcase
 									  end
 							default: begin 
@@ -398,7 +448,7 @@ end
 assign save_signal = save_signal_reg; 
 assign load_signal = load_signal_reg; 
 assign sensor_input_to_save = sensor_in_to_save_reg; 
-
+assign state_load_out = state_load; 
 assign b_data = color_output[23:16];
 assign g_data = color_output[15:8];
 assign r_data = color_output[7:0]; 

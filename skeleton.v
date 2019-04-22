@@ -11,7 +11,7 @@ module skeleton(resetn,
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
-	CLOCK_50, sensor_input, sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out);  													// 50 MHz clock
+	CLOCK_50, sensor_input, sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out, state_load_out);  													// 50 MHz clock
 		
 	////////////////////////	VGA	////////////////////////////
 	output			VGA_CLK;   				//	VGA Clock
@@ -63,6 +63,7 @@ module skeleton(resetn,
 	wire [31:0] sensor_input_to_save; 
 	output [31:0] save_signal; 
 	output [31:0] load_signal; 
+	output [2:0] state_load_out; 
 
 	// clock divider (by 5, i.e., 10 MHz)
 	pll div(CLOCK_50,inclock);
@@ -108,11 +109,12 @@ module skeleton(resetn,
 								 .g_data(VGA_G),
 								 .r_data(VGA_R), 
 								 .sensor_input(sensor_input), //input
-								 .sensor_output(sensor_output), //input
+								 .sensor_output_adjusted(sensor_output), //input
 								 .controller(controller), //input
 								 .sensor_input_to_save(sensor_input_to_save), //output to processor
 								 .save_signal(save_signal), //output to processor
-								 .load_signal(load_signal)); //output to processor
+								 .load_signal(load_signal), 
+								 .state_load_out(state_load_out)); //output to processor
 								 
 
 	

@@ -121,7 +121,11 @@ reg [31:0] sensor_out_to_load_reg;  //when I get an output and I want to save to
 reg [31:0] screen_reg; 
 reg [31:0] counter_reg; 
 reg [31:0] counter_increment; 
-//   
+reg [31:0] counter_game;
+reg [31:0] counter_interval;
+reg [31:0] game_RNG;
+reg [31:0] points;
+
 
 reg [15:0] counter_hit; 
 
@@ -134,11 +138,14 @@ parameter START = 3'b000, WAIT = 3'b001;
 parameter PAD1 = 32'd1, PAD2 = 32'd2, PAD3 = 32'd3; 
 parameter CASE_NO_OUTPUT = 3'b000, CASE_NEW_OUTPUT = 3'b001, CASE_PAD1_OUTPUT = 3'B010, CASE_PAD2_OUTPUT = 3'B011, CASE_PAD3_OUTPUT = 3'B100; 
 parameter NO_INPUT = 32'b00000000000000000000000000011111; 
+parameter WAIT_GAME = 3'd0, GAME1 = 3'd1, GAME2 = 3'd2, GAME3 = 3'd3, GAMEOVER = 3'd4; 
 //=============Internal Variables======================
 reg   [SIZE-1:0] state;
 reg   [SIZE_CONTROLLER-1:0] state_controller, state_controller2; 
 reg	[SIZE_LOAD-1:0] state_load; 
 reg	[SIZE_OUTPUT-1:0] state_output; 
+reg [3:0] game_state;
+
 
 
 always@(posedge VGA_CLK_n) 
@@ -200,13 +207,68 @@ begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						end
-		 MODE_GAME : if (controller_reg[0] == 1'b1) begin
+		MODE_GAME : if (controller_reg[0] == 1'b1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						end else begin
 						  state <=  #1  MODE_GAME;
-						  screen_reg <= GAME; 
-						end
+						  screen_reg <= GAME;
+						  counter_game <= 0; 
+						  case (game_state)
+							WAIT_GAME: 
+								game_RNG <= $urandom%2; 
+								counter_game <= counter_game+32'd1;
+								if (game_RNG ==32'd0) begin
+									sensor_out_to_load_reg <= PAD1;
+									game_state <= #1 GAME1;
+								end else if (game_RNG == 32'd1) begin
+									sensor_out_to_load_reg <= PAD2;
+									game_state <= #1 GAME2;
+								end else if (game_RNG ==32'd2) begin
+									sensor_out_to_load_reg <= PAD3;
+									game_state <= #1 GAME3;
+								end else if (counter_game >20) begin
+									game_state <= #1 GAMEOVER;
+									
+								end 
+							GAME1:
+								if (sensor_in[14:10] != 5'b11111) begin 
+									if (sensor_in[14]==1'b0) points <= points +4;
+									if (sensor_in[13:10] != 4'b1111) points <= points+2;
+									game_state <= #1 WAIT_GAME;
+								end else if (counter_interval>10000000) begin
+									game_state <= #1 WAIT_GAME;
+									counter_inteveral <= 0; 
+								end else begin
+								counter_interval <= counter_interval+1;
+							GAME2:
+								if (sensor_in[9:5] != 5'b11111) begin 
+									if (sensor_in[9]== 1'b0) points <= points +4;
+									if (sensor_in[8:5] != 4'b1111) points <= points+2;
+									game_state <= #1 WAIT_GAME;
+								end else if (counter_interval>10000000) begin
+									game_state <= #1 WAIT_GAME;
+									counter_inteveral <= 0; 
+
+								end else begin
+								counter_interval <= counter_interval+1;
+							GAME3:
+								if (sensor_in[4:0] != 5'b11111) begin 
+									if (sensor_in[4]== 1'b0) points <= points +4;
+									if (sensor_in[3:0] != 4'b1111) points <= points+2;
+									game_state <= #1 WAIT_GAME;
+								end else if (counter_interval>10000000) begin
+									game_state <= #1 WAIT_GAME;
+									counter_inteveral <= 0; 
+
+								end else begin
+								counter_interval <= counter_interval+1;
+								end	
+							GAMEOVER:
+								game_state <= #1 GAMEOVER;
+					
+						endcase
+					end
 						
 		 MODE_SAVE : if (controller_reg[0] == 1'b1) begin
 						  state <=  #1  MODE_MAIN;

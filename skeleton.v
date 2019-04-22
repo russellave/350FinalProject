@@ -99,7 +99,10 @@ module skeleton(resetn,
 	// some LEDs that you could use for debugging if you wanted
 	assign leds = 8'b00101011;
 	
-	assign adjusted_sensor_output = sensor_output; //add logic here! 
+   or or_pad1(adjusted_sensor_output[0], ~sensor_output[0], ~sensor_output[1], ~sensor_output[2], ~sensor_output[3], ~sensor_output[4]);
+	or or_pad2(adjusted_sensor_output[1], ~sensor_output[5], ~sensor_output[6], ~sensor_output[7], ~sensor_output[8], ~sensor_output[9]);
+	or or_pad3(adjusted_sensor_output[2], ~sensor_output[14], ~sensor_output[13], ~sensor_output[12], ~sensor_output[11], ~sensor_output[10]);
+	
 		
 	// VGA
 	Reset_Delay			r0	(.iCLK(CLOCK_50),.oRESET(DLY_RST)	);

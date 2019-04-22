@@ -284,13 +284,8 @@ begin
 											state_controller2<=LOC2; 
 											counter_reg <= 32'd1000; 
 											case(state_load)
-												 START : if (sensor_output_adjusted == PAD1) begin
-																 state_load <=  #1  WAIT1;
-															end else if (sensor_output_adjusted == PAD2) begin
-																 state_load <=  #1  WAIT2;
-															end else if (sensor_output_adjusted == PAD3) begin
-																 state_load <=  #1  WAIT3;
-																 
+												 START : if (sensor_out_to_load_reg == PAD1) begin
+																 state_load <=  #1  WAIT;
 															end else begin
 																  state_load <=  #1  START;
 																end
@@ -316,16 +311,10 @@ begin
 											state_controller2<=LOC3; 
 											counter_reg <= 32'd1500; 
 											case(state_load)
-												 START : if (sensor_output_adjusted == PAD1) begin
-																 state_load <=  #1  WAIT1;
-															end else if (sensor_output_adjusted == PAD2) begin
-																 state_load <=  #1  WAIT2;
-															end else if (sensor_output_adjusted == PAD3) begin
-																 state_load <=  #1  WAIT3;
-																 
+												 START : if (sensor_out_to_load_reg == PAD1) begin
+																 state_load <=  #1  WAIT;
 															end else begin
 																  state_load <=  #1  START;
-																 
 																end
 												 WAIT: if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;

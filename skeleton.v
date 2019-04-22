@@ -72,7 +72,7 @@ module skeleton(resetn,
 	assign clock = CLOCK_50;
 	
 	// UNCOMMENT FOLLOWING LINE AND COMMENT ABOVE LINE TO RUN AT 50 MHz
-	//assign clock = inclock;
+//   assign clock = inclock;
 	
 	// your processor
 	processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, save_signal, load_signal, counter/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);

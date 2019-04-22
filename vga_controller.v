@@ -113,8 +113,8 @@ reg [31:0] controller_reg;
 reg [31:0] sensor_in_to_save_reg; 
 reg [31:0] save_signal_reg; 
 reg [31:0] load_signal_reg; 
-reg [31:0] sensor_out_to_load_reg;
-
+reg [31:0] sensor_out_to_load_reg;  //when I get an output and I want to save to constantly output it
+//reg [31:0] sensor_out_to_save_reg;  //
 //values vga_controller calculate
  
 reg [31:0] screen_reg; 
@@ -124,16 +124,19 @@ reg [31:0] counter_reg;
 reg [15:0] counter_hit; 
 
 //fsm stuff
-parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3; 
+parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3, SIZE_OUTPUT = 3; 
 parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens (not states but just useful)
 parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOAD = 3'b011, MODE_GAME = 3'b100; //modes
 parameter LOC1 = 32'd1, LOC2 = 32'd2, LOC3 = 32'd3, NONE = 32'd0;  //save locations
 parameter START = 3'b000, WAIT = 3'b001; 
 parameter PAD1 = 32'd1, PAD2 = 32'd2, PAD3 = 32'd3; 
+parameter CASE_NO_OUTPUT = 3'b000, CASE_NEW_OUTPUT = 3'b001, CASE_PAD1_OUTPUT = 3'B010, CASE_PAD2_OUTPUT = 3'B011, CASE_PAD3_OUTPUT = 3'B100; 
+parameter NO_INPUT = 32'b00000000000000000000000000011111; 
 //=============Internal Variables======================
 reg   [SIZE-1:0] state;
 reg   [SIZE_CONTROLLER-1:0] state_controller, state_controller2; 
 reg	[SIZE_LOAD-1:0] state_load; 
+reg	[SIZE_OUTPUT-1:0] state_output; 
 
 
 always@(posedge VGA_CLK_n) 
@@ -235,7 +238,38 @@ begin
 						end else begin
 						 state <=  #1  MODE_LOAD;
 						 screen_reg <= SL; 
-  						 sensor_out_to_load_reg <= sensor_output_adjusted; 
+						 //move this outside the mode fsm? just always store the output depending if there's a change or not
+						 case(state_output)
+							 CASE_NEW_OUTPUT : if (sensor_output_adjusted == PAD1) begin
+											  state_output <=  #1  CASE_PAD1_OUTPUT;
+										  end else if(sensor_output_adjusted == PAD2) begin
+											  state_output <=  #1  CASE_PAD2_OUTPUT;
+										  end else if(sensor_output_adjusted == PAD3) begin
+											  state_output <=  #1  CASE_PAD3_OUTPUT;
+										  end else begin
+											  state <=  #1  CASE_NEW_OUTPUT;
+											end
+							 CASE_PAD1_OUTPUT : if (SENSOR_INPUT != NO_INPUT) begin
+											  state <=  #1  CASE_NEW_OUTPUT;
+											end else begin
+										  sensor_out_to_load_reg <= PAD1; 										  
+										  state <=  #1 CASE_PAD1_OUOTPUT;
+											end
+							CASE_PAD2_OUTPUT : if (SENSOR_INPUT != NO_INPUT) begin
+										state <=  #1  CASE_NEW_OUTPUT;
+										end else begin
+										sensor_out_to_load_reg <= PAD2; 										  
+										state <=  #1 CASE_PAD2_OUOTPUT;
+								end
+							 CASE_PAD3_OUTPUT : if (SENSOR_INPUT != NO_INPUT) begin
+										state <=  #1  CASE_NEW_OUTPUT;
+										end else begin
+										sensor_out_to_load_reg <= PAD3; 										  
+										state <=  #1 CASE_PAD3_OUOTPUT;
+								end
+							 default : state <=  #1  CASE_NEW_OUTPUT;
+						 endcase
+						  
 						 case(state_controller2)
 							NONE:  if (controller_reg[1] == 1'b1) begin
 									  state_controller2 <= #1 LOC1; 
@@ -263,7 +297,7 @@ begin
 															end else begin
 																  state_load <=  #1  START;
 																end
-												 WAIT: if(sensor_input != 32'b00000000000000000000000000011111) begin
+												 WAIT: if(sensor_input != NO_INPUT) begin
 																  state_load <=  #1  START;
 																  counter_reg <= counter_reg +1;
 
@@ -289,7 +323,7 @@ begin
 															end else begin
 																  state_load <=  #1  START;
 																end
-												 WAIT: if(sensor_input != 32'b00000000000000000000000000011111) begin
+												 WAIT: if(sensor_input != NO_INPUT) begin
 																  state_load <=  #1  START;
 																  counter_reg <= counter_reg +1;
 
@@ -316,7 +350,7 @@ begin
 															end else begin
 																  state_load <=  #1  START;
 																end
-												 WAIT: if(sensor_input != 32'b00000000000000000000000000011111) begin
+												 WAIT: if(sensor_input != NO_INPUT) begin
 																  state_load <=  #1  START;
 																  counter_reg <= counter_reg +1;
 

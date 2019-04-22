@@ -254,6 +254,7 @@ begin
 									  end else if (controller_reg[3] == 1'b1) begin
 									  state_controller2 <= #1 LOC3; 
 									  end else begin 
+											counter_reg <= 32'd500; 
 											load_signal_reg <= LOC1; 
 											state_controller2<=LOC1; 
 											case(state_load)
@@ -269,20 +270,22 @@ begin
 																end
 												 WAIT1 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT1;
 																end
 												 WAIT2 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
+
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT2;
 																end
 												 WAIT3 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
+
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT3;
 																end
 												 default : state_load <=  #1  START;
@@ -297,6 +300,7 @@ begin
 									  end else begin 
 											load_signal_reg <= LOC2; 
 											state_controller2<=LOC2; 
+											counter_reg <= 32'd1000; 
 											case(state_load)
 												 START : if (sensor_output_adjusted == PAD1) begin
 																 state_load <=  #1  WAIT1;
@@ -310,20 +314,23 @@ begin
 																end
 												 WAIT1 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
+
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT1;
 																end
 												 WAIT2 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
+
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT2;
 																end
 												 WAIT3 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
+
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT3;
 																end
 												 default : state_load <=  #1  START;
@@ -339,6 +346,7 @@ begin
 									  end else begin 
 											load_signal_reg <= LOC3; 
 											state_controller2<=LOC3; 
+											counter_reg <= 32'd1500; 
 											case(state_load)
 												 START : if (sensor_output_adjusted == PAD1) begin
 																 state_load <=  #1  WAIT1;
@@ -352,20 +360,22 @@ begin
 																end
 												 WAIT1 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
+
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT1;
 																end
 												 WAIT2 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
+
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT2;
 																end
 												 WAIT3 : if(sensor_input != 32'b00000000000000000000000000011111) begin
 																  state_load <=  #1  START;
+																  counter_reg <= counter_reg +1
 															  end else begin
-															  	  load_signal_reg <= NONE;
 																  state_load <=  #1  WAIT3;
 																end
 												 default : state_load <=  #1  START;

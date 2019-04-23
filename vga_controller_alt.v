@@ -332,55 +332,56 @@ begin
 		if(screen_reg == GAME)
 		begin //display game screen
 			if((x > 10'd71) && (x<10'd573)&&(y<10'd97) && (y>10'd0)) color_output<=24'hFFFFFF;
-		end
-		
-		
-		if(animation_reg == 6'b000001) begin
+			if(animation_reg == 6'b000001) begin
 			//182,271: 274, 334
 			if((x > 10'd182) && (x<10'd271)&&(y<10'd334) && (y>10'd274)) color_output<=bgr_data_raw_ani;
 
-		end
-		if(animation_reg == 6'b000010) begin
-			//152,224: 207, 263
-			if((x > 10'd152) && (x<10'd207)&&(y<10'd263) && (y>10'd207)) color_output<=bgr_data_raw_ani;
+			end
+			if(animation_reg == 6'b000010) begin
+				//152,224: 207, 263
+				if((x > 10'd152) && (x<10'd207)&&(y<10'd263) && (y>10'd207)) color_output<=bgr_data_raw_ani;
 
-		end
-		if(animation_reg == 6'b000011) begin
-			//74, 111, //170, 167
-			if((x > 10'd74) && (x<10'd170)&&(y<10'd167) && (y>10'd111)) color_output<=bgr_data_raw_ani;
+			end
+			if(animation_reg == 6'b000011) begin
+				//74, 111, //170, 167
+				if((x > 10'd74) && (x<10'd170)&&(y<10'd167) && (y>10'd111)) color_output<=bgr_data_raw_ani;
 
-		end
-		if(animation_reg == 6'b000100) begin
-			//281,290, //346, 382
-			if((x > 10'd281) && (x<10'd346)&&(y<10'd382) && (y>10'd290)) color_output<=bgr_data_raw_ani;
+			end
+			if(animation_reg == 6'b000100) begin
+				//281,290, //346, 382
+				if((x > 10'd281) && (x<10'd346)&&(y<10'd382) && (y>10'd290)) color_output<=bgr_data_raw_ani;
 
-		end
-		if(animation_reg == 6'b001000) begin
-			//294, 219: 339,288
-			if((x > 10'd294) && (x<10'd339)&&(y<10'd219) && (y>10'd288)) color_output<=bgr_data_raw_ani;
-			
-			
-		end
-		if(animation_reg == 6'b001100) begin
-			//267,33 : 367, 83
-			if((x > 10'd267) && (x<10'd367)&&(y<10'd83) && (y>10'd33)) color_output<=bgr_data_raw_ani;
+			end
+			if(animation_reg == 6'b001000) begin
+				//294, 219: 339,288
+				if((x > 10'd294) && (x<10'd339)&&(y<10'd219) && (y>10'd288)) color_output<=bgr_data_raw_ani;
+				
+				
+			end
+			if(animation_reg == 6'b001100) begin
+				//267,33 : 367, 83
+				if((x > 10'd267) && (x<10'd367)&&(y<10'd83) && (y>10'd33)) color_output<=bgr_data_raw_ani;
 
-		end
-		if(animation_reg == 6'b010000) begin
-			//347, 274: 431, 337
-			if((x > 10'd347) && (x<10'd431)&&(y<10'd337) && (y>10'd274)) color_output<=bgr_data_raw_ani;
+			end
+			if(animation_reg == 6'b010000) begin
+				//347, 274: 431, 337
+				if((x > 10'd347) && (x<10'd431)&&(y<10'd337) && (y>10'd274)) color_output<=bgr_data_raw_ani;
 
-		end
-		if(animation_reg == 6'b100000)begin
-			//420, 219 : 485, 264
-			if((x > 10'd420) && (x<10'd485)&&(y<10'd264) && (y>10'd219)) color_output<=bgr_data_raw_ani;
+			end
+			if(animation_reg == 6'b100000)begin
+				//420, 219 : 485, 264
+				if((x > 10'd420) && (x<10'd485)&&(y<10'd264) && (y>10'd219)) color_output<=bgr_data_raw_ani;
 
-		end
-		if(animation_reg == 6'b110000)begin
-			//451, 118 : 557, 179
-			if((x > 10'd451) && (x<10'd557)&&(y<10'd179) && (y>10'd118)) color_output<=bgr_data_raw_ani;
+			end
+			if(animation_reg == 6'b110000)begin
+				//451, 118 : 557, 179
+				if((x > 10'd451) && (x<10'd557)&&(y<10'd179) && (y>10'd118)) color_output<=bgr_data_raw_ani;
 
+			end
 		end
+		
+		
+		
 
 		
 		

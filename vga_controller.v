@@ -42,9 +42,11 @@ wire VGA_CLK_n;
 wire [7:0] index;
 wire [7:0] index_main; 
 wire [7:0] index_splash; 
+wire [7:0] index_animation; 
 wire [31:0] screen; 
 wire [23:0] bgr_data_raw;
 wire [23:0] bgr_data_raw_splash;
+wire [23:0] bgr_data_raw_ani; 
 wire cBLANK_n,cHS,cVS,rst;
 ////
 assign rst = ~iRST_n;
@@ -81,6 +83,12 @@ splash_data	splash_data_inst (
 	.q ( index_splash )
 	);
 	
+animation_data ani_data_inst(
+	.address ( ADDR ),
+	.clock ( VGA_CLK_n ),
+	.q ( index_animation )
+	);
+	
 /////////////////////////
 //////Add switch-input logic here
 
@@ -96,6 +104,11 @@ img_index splash_index_inst(
 	.address(index_splash), 
 	.clock(iVGA_CLK),
 	.q(bgr_data_raw_splash)); 
+	
+img_index ani_index_inst(
+	.address(index_animation), 
+	.clock(iVGA_CLK),
+	.q(bgr_data_raw_ani)); 	
 //////
 //////latch valid data at falling edge;
 
@@ -122,22 +135,28 @@ reg [31:0] screen_reg;
 reg [31:0] counter_reg; 
 reg [31:0] counter_increment; 
 reg [31:0] counter_game;
-reg [31:0] counter_interval;
+reg [31:0] counter_int;
 reg [31:0] game_RNG;
+reg [63:0] game_RNG_total;
+
 reg [31:0] points;
 
 
 reg [15:0] counter_hit; 
 
 //fsm stuff
+parameter MAX_COUNT = 32'd200000000; 
 parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3, SIZE_OUTPUT = 3; 
 parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens (not states but just useful)
 parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOAD = 3'b011, MODE_GAME = 3'b100; //modes
 parameter LOC1 = 32'd1, LOC2 = 32'd2, LOC3 = 32'd3, NONE = 32'd0;  //save locations
 parameter START = 3'b000, WAIT = 3'b001; 
 parameter PAD1 = 32'd1, PAD2 = 32'd2, PAD3 = 32'd3; 
+parameter OUT1 = 32'b11111111111111111111111111111110, OUT2 = 32'b11111111111111111111111111111101, OUT3 = 32'b11111111111111111111111111111011;
 parameter CASE_NO_OUTPUT = 3'b000, CASE_NEW_OUTPUT = 3'b001, CASE_PAD1_OUTPUT = 3'B010, CASE_PAD2_OUTPUT = 3'B011, CASE_PAD3_OUTPUT = 3'B100; 
-parameter NO_INPUT = 32'b00000000000000000000000000011111; 
+//parameter NO_INPUT = 32'b00000000000000000000000000011111; 
+parameter NO_INPUT = 32'b11111111111111111111111111111111;  
+
 parameter WAIT_GAME = 3'd0, GAME1 = 3'd1, GAME2 = 3'd2, GAME3 = 3'd3, GAMEOVER = 3'd4; 
 //=============Internal Variables======================
 reg   [SIZE-1:0] state;
@@ -187,90 +206,103 @@ begin
 		 endcase
 		//FSM
 		case(state)
-		 MODE_SPLASH : if (controller_reg[1] || controller_reg[2]||controller_reg[3] || controller_reg[0]) begin
+		 MODE_SPLASH : if (~controller_reg[1] || ~controller_reg[2]||~controller_reg[3] || ~controller_reg[0]) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						end else begin
 						  state <=  #1  MODE_SPLASH;
 						  screen_reg <= SPLASH; 
 						end
-		 MODE_MAIN : if (controller_reg[2] == 1'b1) begin
+		 MODE_MAIN : if (~controller_reg[2] == 1'b1) begin
 						  state <=  #1  MODE_LOAD;
 						  screen_reg <= SL; 
-					end else if (controller_reg[1] == 1'b1) begin
+					end else if (~controller_reg[1] == 1'b1) begin
 						  state <=  #1  MODE_SAVE;
 						  screen_reg <= SL; 
-					end else if (controller_reg[3] == 1'b1) begin
+					end else if (~controller_reg[3] == 1'b1) begin
 						  state <=  #1  MODE_GAME;
 						  screen_reg <= GAME; 
 					 end else begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						end
-		MODE_GAME : if (controller_reg[0] == 1'b1) begin
+		MODE_GAME : if (~controller_reg[0] == 1'b1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
+//						  game_RNG_total <= 64'b0110100111001111001000101011010110101010110101011001111111011111;
+
+						  
 						end else begin
 						  state <=  #1  MODE_GAME;
 						  screen_reg <= GAME;
-						  counter_game <= 0; 
 						  case (game_state)
 							WAIT_GAME: 
-								game_RNG <= $urandom%2; 
+								begin
 								counter_game <= counter_game+32'd1;
+
+								game_RNG <= counter_game % 32'd3;  //just use some nonlinear function here
+								
 								if (game_RNG ==32'd0) begin
-									sensor_out_to_load_reg <= PAD1;
+									sensor_out_to_load_reg <= OUT3;
 									game_state <= #1 GAME1;
 								end else if (game_RNG == 32'd1) begin
-									sensor_out_to_load_reg <= PAD2;
+									sensor_out_to_load_reg <= OUT2;
 									game_state <= #1 GAME2;
 								end else if (game_RNG ==32'd2) begin
-									sensor_out_to_load_reg <= PAD3;
+									sensor_out_to_load_reg <= OUT1;
 									game_state <= #1 GAME3;
-								end else if (counter_game >20) begin
+								end else if (counter_game >20) begin 
 									game_state <= #1 GAMEOVER;
 									
 								end 
+								end
 							GAME1:
 								if (sensor_in[14:10] != 5'b11111) begin 
 									if (sensor_in[14]==1'b0) points <= points +4;
 									if (sensor_in[13:10] != 4'b1111) points <= points+2;
 									game_state <= #1 WAIT_GAME;
-								end else if (counter_interval>10000000) begin
+								end else if (counter_int>MAX_COUNT) begin
 									game_state <= #1 WAIT_GAME;
-									counter_inteveral <= 0; 
+									counter_int <= 0; 
 								end else begin
-								counter_interval <= counter_interval+1;
+								counter_int <= counter_int+1;
+								game_state <= GAME1; 
+								end
 							GAME2:
 								if (sensor_in[9:5] != 5'b11111) begin 
 									if (sensor_in[9]== 1'b0) points <= points +4;
 									if (sensor_in[8:5] != 4'b1111) points <= points+2;
 									game_state <= #1 WAIT_GAME;
-								end else if (counter_interval>10000000) begin
+								end else if (counter_int>MAX_COUNT) begin
 									game_state <= #1 WAIT_GAME;
-									counter_inteveral <= 0; 
+									counter_int <= 0; 
 
 								end else begin
-								counter_interval <= counter_interval+1;
+								counter_int <= counter_int+1;
+								game_state <= GAME2; 
+								
+								end
 							GAME3:
 								if (sensor_in[4:0] != 5'b11111) begin 
 									if (sensor_in[4]== 1'b0) points <= points +4;
 									if (sensor_in[3:0] != 4'b1111) points <= points+2;
 									game_state <= #1 WAIT_GAME;
-								end else if (counter_interval>10000000) begin
+								end else if (counter_int>MAX_COUNT) begin
 									game_state <= #1 WAIT_GAME;
-									counter_inteveral <= 0; 
+									counter_int <= 0; 
 
 								end else begin
-								counter_interval <= counter_interval+1;
+								counter_int <= counter_int+1;
+								game_state <= GAME3; 
 								end	
 							GAMEOVER:
+								begin
 								game_state <= #1 GAMEOVER;
-					
+								end
 						endcase
 					end
 						
-		 MODE_SAVE : if (controller_reg[0] == 1'b1) begin
+		 MODE_SAVE : if (~controller_reg[0] == 1'b1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						  save_signal_reg <=NONE; 
@@ -279,41 +311,41 @@ begin
 						 screen_reg <= SL; 
   						 sensor_in_to_save_reg <= sensor_input; 
 						 case(state_controller)
-							NONE:  if (controller_reg[1] == 1'b1) begin
+							NONE:  if (~controller_reg[1] == 1'b1) begin
 									  state_controller <= #1 LOC1; 
-									  end else if (controller_reg[2] == 1'b1) begin
+									  end else if (~controller_reg[2] == 1'b1) begin
 									  state_controller <= #1 LOC2; 
-									  end else if (controller_reg[3] == 1'b1) begin
+									  end else if (~controller_reg[3] == 1'b1) begin
 									  state_controller <= #1 LOC3; 
 									  end else begin 
 											state_controller<=NONE;
 											save_signal_reg <= NONE; 
 									  end
-							LOC1:	if (controller_reg[0] == 1'b1) begin
+							LOC1:	if (~controller_reg[0] == 1'b1) begin
 									  state_controller <= #1 NONE; 
-									  end else if (controller_reg[2] == 1'b1) begin
+									  end else if (~controller_reg[2] == 1'b1) begin
 									  state_controller <= #1 LOC2; 
-									  end else if (controller_reg[3] == 1'b1) begin
+									  end else if (~controller_reg[3] == 1'b1) begin
 									  state_controller <= #1 LOC3; 
 									  end else begin 
 											state_controller<=LOC1; 
 											save_signal_reg <= LOC1; 
 									  end
-							LOC2: if (controller_reg[0] == 1'b1) begin
+							LOC2: if (~controller_reg[0] == 1'b1) begin
 									  state_controller <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
+									  end else if (~controller_reg[1] == 1'b1) begin
 									  state_controller <= #1 LOC1; 
-									  end else if (controller_reg[3] == 1'b1) begin
+									  end else if (~controller_reg[3] == 1'b1) begin
 									  state_controller <= #1 LOC3; 
 									  end else begin 
 											state_controller<=LOC2; 
 											save_signal_reg <= LOC2; 
 									  end
-							LOC3: if (controller_reg[0] == 1'b1) begin
+							LOC3: if (~controller_reg[0] == 1'b1) begin
 									  state_controller <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
+									  end else if (~controller_reg[1] == 1'b1) begin
 									  state_controller <= #1 LOC1; 
-									  end else if (controller_reg[2] == 1'b1) begin
+									  end else if (~controller_reg[2] == 1'b1) begin
 									  state_controller <= #1 LOC2; 
 									  end else begin 
 											state_controller<=LOC3; 
@@ -325,7 +357,7 @@ begin
 							end
 							endcase
 							end
-		 MODE_LOAD : if (controller_reg[0] == 1'b1) begin
+		 MODE_LOAD : if (~controller_reg[0] == 1'b1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						  load_signal_reg <=NONE; 
@@ -336,15 +368,15 @@ begin
 
 						  
 						 case(state_controller2)
-							NONE:  if (controller_reg[1] == 1'b1) begin
+							NONE:  if (~controller_reg[1] == 1'b1) begin
 									  state_controller2 <= #1 LOC1; 
 									  counter_increment <= 32'd0; 
 
-									  end else if (controller_reg[2] == 1'b1) begin
+									  end else if (~controller_reg[2] == 1'b1) begin
 									  state_controller2 <= #1 LOC2; 
 									  counter_increment <= 32'd0; 
 
-									  end else if (controller_reg[3] == 1'b1) begin
+									  end else if (~controller_reg[3] == 1'b1) begin
 									  state_controller2 <= #1 LOC3; 
 									  counter_increment <= 32'd0; 
 
@@ -353,11 +385,11 @@ begin
 											load_signal_reg <= NONE; 
 											counter_increment <= 32'd0; 
 									  end
-							LOC1:	if (controller_reg[0] == 1'b1) begin
+							LOC1:	if (~controller_reg[0] == 1'b1) begin
 									  state_controller2 <= #1 NONE; 
-									  end else if (controller_reg[2] == 1'b1) begin
+									  end else if (~controller_reg[2] == 1'b1) begin
 									  state_controller2 <= #1 LOC2; 
-									  end else if (controller_reg[3] == 1'b1) begin
+									  end else if (~controller_reg[3] == 1'b1) begin
 									  state_controller2 <= #1 LOC3; 
 									  end else begin 
 											counter_reg <= 32'd500; 
@@ -380,11 +412,11 @@ begin
 												 default : state_load <=  #1  START;
 											 endcase
 									  end
-							LOC2: if (controller_reg[0] == 1'b1) begin
+							LOC2: if (~controller_reg[0] == 1'b1) begin
 									  state_controller2 <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
+									  end else if (~controller_reg[1] == 1'b1) begin
 									  state_controller2 <= #1 LOC1; 
-									  end else if (controller_reg[3] == 1'b1) begin
+									  end else if (~controller_reg[3] == 1'b1) begin
 									  state_controller2 <= #1 LOC3; 
 									  end else begin 
 											load_signal_reg <= LOC2; 
@@ -409,11 +441,11 @@ begin
 											 endcase
 									  end
 									  
-							LOC3: if (controller_reg[0] == 1'b1) begin
+							LOC3: if (~controller_reg[0] == 1'b1) begin
 									  state_controller2 <= #1 NONE; 
-									  end else if (controller_reg[1] == 1'b1) begin
+									  end else if (~controller_reg[1] == 1'b1) begin
 									  state_controller2 <= #1 LOC1; 
-									  end else if (controller_reg[2] == 1'b1) begin
+									  end else if (~controller_reg[2] == 1'b1) begin
 									  state_controller2 <= #1 LOC2; 
 									  end else begin 
 											load_signal_reg <= LOC3; 

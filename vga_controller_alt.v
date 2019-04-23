@@ -76,12 +76,12 @@ splash_data	splash_data_inst (
 	.q ( index_splash )
 	);
 	
-animation_data ani_data_inst(
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index_animation )
-	);
-	
+//animation_data ani_data_inst(
+//	.address ( ADDR ),
+//	.clock ( VGA_CLK_n ),
+//	.q ( index_animation )
+//	);
+//	
 /////////////////////////
 //////Add switch-input logic here
 
@@ -161,6 +161,7 @@ always@(posedge VGA_CLK_n)
 begin
 		bgr_data <= bgr_data_raw;
 		sensor_in <= sensor_input;
+
 		screen_input_reg <= screen; 
 		//FSM
 		case(state)
@@ -172,7 +173,7 @@ begin
 						  screen_reg <= SPLASH; 
 						end
 		 MODE_MAIN : if (screen_input_reg == 32'd2) begin
-						  state <=  #1  MODE_GAME;
+						  state <=  #1  MODE_SL;
 						  screen_reg <= SL; 
 					end else if (screen_input_reg == 32'd3) begin
 						  state <=  #1  MODE_GAME;
@@ -185,12 +186,13 @@ begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 					 end else begin
-						  state <=  #1  MODE_GAME;
+						  state <=  #1  MODE_SL;
 						  screen_reg <= SL; 
 						end
 		MODE_GAME : if (screen_input_reg == 32'd1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
+						  counter_game <= 0; 
 						end else begin
 						  state <=  #1  MODE_GAME;
 						  screen_reg <= GAME;
@@ -347,9 +349,11 @@ begin
 		
 		if(screen_reg == GAME)
 		begin //display game screen
-			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'hFFFFFF; //no scores
+			//16, 294: 125, 380
+			if((x > 10'd16) && (x<10'd125)&&(y<10'd380) && (y>10'd294)) color_output<=24'hFFFFFF; //no scores
 
-			if((x > 10'd71) && (x<10'd573)&&(y<10'd97) && (y>10'd0)) color_output<=24'hFFFFFF;
+			if((x > 10'd71) && (x<10'd573)&&(y<10'd97) && (y>10'd0)) color_output<=24'hFFFFFF; //no save or load or modes
+			
 			if(animation_reg == 6'b000001) begin
 			//182,271: 274, 334
 			if((x > 10'd182) && (x<10'd271)&&(y<10'd334) && (y>10'd274)) color_output<=bgr_data_raw_ani;

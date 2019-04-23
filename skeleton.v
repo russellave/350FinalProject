@@ -48,7 +48,6 @@ module skeleton(resetn,
 	wire	[7:0]	 ps2_out;	
 	
 	//Final Project 
-	
 	input [31:0] sensor_input; //only first (lsb) 24 bits matter. goes to vga controller and processor (address 0)
 	output [31:0] sensor_input_out; 
 	assign sensor_input_out = sensor_input; 
@@ -147,9 +146,9 @@ module skeleton(resetn,
 							 .scoreconverted(scoreconverted));
 	wire case_game; 
 	output [31:0] out_final; 
-	assign out_final = out_game; 
-//	or or_out_game_not_zero(out_game[0], out_game[1], out_game[2], out_game[3], out_game[4], out_game[5]); 
-//	assign out_final = case_game ? out_game : sensor_output;  
+//	assign out_final = out_game; 
+	or or_out_game_not_zero(case_game, ~out_game[0], ~out_game[1], ~out_game[2], ~out_game[3], ~out_game[4], ~out_game[5]); 
+	assign out_final = case_game ? out_game : sensor_output;  
 	
 	
 	wire game_over; 

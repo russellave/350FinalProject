@@ -125,7 +125,27 @@ module skeleton(resetn,
 								 .load_counter(counter), //output to processor
 								 .final_out_dummy(final_sensor_output)); 
 								 
-
-	
+//	wire game_over; 
+//	assign game_over = 1'b0; 
+//	DE2_Audio_Example audio_inst (
+//	.game_over(game_over),
+//	// Inputs
+//	.CLOCK_50(CLOCK_50),
+//	AUD_ADCDAT,
+//	KEY,
+//	
+//	// Bidirectionals
+//	AUD_BCLK,
+//	AUD_ADCLRCK,
+//	AUD_DACLRCK,
+//
+//	I2C_SDAT,
+//
+//	// Outputs
+//	AUD_XCK,
+//	AUD_DACDAT,
+//
+//	I2C_SCLK
+//	);
 	
 endmodule

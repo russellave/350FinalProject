@@ -48,6 +48,7 @@ wire [23:0] bgr_data_raw;
 wire [23:0] bgr_data_raw_splash;
 wire [23:0] bgr_data_raw_ani; 
 wire cBLANK_n,cHS,cVS,rst;
+wire animation; 
 ////
 assign rst = ~iRST_n;
 video_sync_generator LTM_ins (.vga_clk(iVGA_CLK),
@@ -138,6 +139,7 @@ reg [31:0] counter_game;
 reg [31:0] counter_int;
 reg [31:0] game_RNG;
 reg [63:0] game_RNG_total;
+reg [5:0] animation_reg; 
 
 reg [31:0] points;
 
@@ -145,7 +147,7 @@ reg [31:0] points;
 reg [15:0] counter_hit; 
 
 //fsm stuff
-parameter MAX_COUNT = 32'd200000000; 
+parameter MAX_COUNT = 32'd20000000; 
 parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3, SIZE_OUTPUT = 3; 
 parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens (not states but just useful)
 parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOAD = 3'b011, MODE_GAME = 3'b100; //modes
@@ -229,9 +231,6 @@ begin
 		MODE_GAME : if (~controller_reg[0] == 1'b1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
-//						  game_RNG_total <= 64'b0110100111001111001000101011010110101010110101011001111111011111;
-
-						  
 						end else begin
 						  state <=  #1  MODE_GAME;
 						  screen_reg <= GAME;
@@ -244,13 +243,13 @@ begin
 								
 								if (game_RNG ==32'd0) begin
 									sensor_out_to_load_reg <= OUT3;
-									game_state <= #1 GAME1;
+									game_state <= #1 GAME3;
 								end else if (game_RNG == 32'd1) begin
 									sensor_out_to_load_reg <= OUT2;
 									game_state <= #1 GAME2;
 								end else if (game_RNG ==32'd2) begin
 									sensor_out_to_load_reg <= OUT1;
-									game_state <= #1 GAME3;
+									game_state <= #1 GAME1;
 								end else if (counter_game >20) begin 
 									game_state <= #1 GAMEOVER;
 									
@@ -264,9 +263,14 @@ begin
 								end else if (counter_int>MAX_COUNT) begin
 									game_state <= #1 WAIT_GAME;
 									counter_int <= 0; 
+								end else if(counter >MAX_COUNT*2/3) begin
+									animation_reg <= 6'b000011;
+								end else if( counter > MAX_COUNT*1/3) begin
+									animation_reg <= 6'b000010;
 								end else begin
-								counter_int <= counter_int+1;
-								game_state <= GAME1; 
+									counter_int <= counter_int+1;
+									animation_reg <= 6'b000001;
+									game_state <= GAME1; 
 								end
 							GAME2:
 								if (sensor_in[9:5] != 5'b11111) begin 
@@ -276,10 +280,14 @@ begin
 								end else if (counter_int>MAX_COUNT) begin
 									game_state <= #1 WAIT_GAME;
 									counter_int <= 0; 
-
+								end else if(counter >MAX_COUNT*2/3) begin
+									animation_reg <= 6'b001100;
+								end else if (counter > MAX_COUNT*1/3) begin
+									animation_reg <= 6'b001000;
 								end else begin
-								counter_int <= counter_int+1;
-								game_state <= GAME2; 
+									counter_int <= counter_int+1;
+									animation_reg <= 6'b000100;
+									game_state <= GAME2; 
 								
 								end
 							GAME3:
@@ -290,10 +298,15 @@ begin
 								end else if (counter_int>MAX_COUNT) begin
 									game_state <= #1 WAIT_GAME;
 									counter_int <= 0; 
-
+								end else if(counter >MAX_COUNT*2/3) begin
+									animation_reg <= 6'b110000;
+								end else if (counter > MAX_COUNT*1/3) begin
+									animation_reg <= 6'b100000;
 								end else begin
-								counter_int <= counter_int+1;
-								game_state <= GAME3; 
+									counter_int <= counter_int+1;
+									animation_reg <= 6'b010000;
+									game_state <= GAME3; 
+
 								end	
 							GAMEOVER:
 								begin
@@ -403,8 +416,9 @@ begin
 																end
 												 WAIT: if(sensor_input != NO_INPUT) begin
 																  state_load <=  #1  START;
-																  counter_increment <= counter_increment + 32'd1;
 																  counter_reg <= counter_reg + counter_increment; 
+																  counter_increment <= counter_increment + 32'd1;
+
 
 															  end else begin
 																  state_load <=  #1  WAIT;
@@ -535,6 +549,55 @@ begin
 		begin //display game screen
 			if((x > 10'd71) && (x<10'd573)&&(y<10'd97) && (y>10'd0)) color_output<=24'hFFFFFF;
 		end
+		
+		
+		if(animation_reg == 6'b000001) begin
+			//182,271: 274, 334
+			if((x > 10'd182) && (x<10'd271)&&(y<10'd334) && (y>10'd274)) color_output<=bgr_data_raw_ani;
+
+		end
+		if(animation_reg == 6'b000010) begin
+			//152,224: 207, 263
+			if((x > 10'd152) && (x<10'd207)&&(y<10'd263) && (y>10'd207)) color_output<=bgr_data_raw_ani;
+
+		end
+		if(animation_reg == 6'b000011) begin
+			//74, 111, //170, 167
+			if((x > 10'd74) && (x<10'd170)&&(y<10'd167) && (y>10'd111)) color_output<=bgr_data_raw_ani;
+
+		end
+		if(animation_reg == 6'b000100) begin
+			//281,290, //346, 382
+			if((x > 10'd281) && (x<10'd346)&&(y<10'd382) && (y>10'd290)) color_output<=bgr_data_raw_ani;
+
+		end
+		if(animation_reg == 6'b001000) begin
+			//294, 219: 339,288
+			if((x > 10'd294) && (x<10'd339)&&(y<10'd219) && (y>10'd288)) color_output<=bgr_data_raw_ani;
+			
+			
+		end
+		if(animation_reg == 6'b001100) begin
+			//267,33 : 367, 83
+			if((x > 10'd267) && (x<10'd367)&&(y<10'd83) && (y>10'd33)) color_output<=bgr_data_raw_ani;
+
+		end
+		if(animation_reg == 6'b010000) begin
+			//347, 274: 431, 337
+			if((x > 10'd347) && (x<10'd431)&&(y<10'd337) && (y>10'd274)) color_output<=bgr_data_raw_ani;
+
+		end
+		if(animation_reg == 6'b100000)begin
+			//420, 219 : 485, 264
+			if((x > 10'd420) && (x<10'd485)&&(y<10'd264) && (y>10'd219)) color_output<=bgr_data_raw_ani;
+
+		end
+		if(animation_reg == 6'b110000)begin
+			//451, 118 : 557, 179
+			if((x > 10'd451) && (x<10'd557)&&(y<10'd179) && (y>10'd118)) color_output<=bgr_data_raw_ani;
+
+		end
+
 		
 		
 end

@@ -171,9 +171,9 @@ begin
 	32'h00000010:begin
 		MaxBeatNext <=32'd12500000;
 		MaxFreqNext <=32'd80385;//eflat
-		BeatIncrement <= 32'h00;
+		BeatIncrement <= 32'h00000011;
 		end
-	32'h00000010: begin
+	32'h00000011: begin
 		MaxBeatNext <=32'd1000000000;
 		MaxFreqNext <=32'd71633;//f
 		BeatIncrement <= 32'h0;

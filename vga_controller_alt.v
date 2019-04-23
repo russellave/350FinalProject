@@ -129,12 +129,13 @@ reg [63:0] game_RNG_total;
 reg [5:0] animation_reg; 
 
 reg [31:0] points;
+reg [31:0] high1,high2,high3;
 
 
 reg [15:0] counter_hit; 
 
 //fsm stuff
-parameter MAX_COUNT = 32'd20000000; 
+parameter MAX_COUNT = 32'd31000000; 
 parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3, SIZE_OUTPUT = 3; 
 parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens (not states but just useful)
 parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SL = 3'b010, MODE_GAME = 3'b011; //modes
@@ -171,7 +172,7 @@ begin
 						  screen_reg <= SPLASH; 
 						end
 		 MODE_MAIN : if (screen_input_reg == 32'd2) begin
-						  state <=  #1  MODE_SL;
+						  state <=  #1  MODE_GAME;
 						  screen_reg <= SL; 
 					end else if (screen_input_reg == 32'd3) begin
 						  state <=  #1  MODE_GAME;
@@ -184,7 +185,7 @@ begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 					 end else begin
-						  state <=  #1  MODE_SL;
+						  state <=  #1  MODE_GAME;
 						  screen_reg <= SL; 
 						end
 		MODE_GAME : if (screen_input_reg == 32'd1) begin
@@ -196,10 +197,8 @@ begin
 						  case (game_state)
 							WAIT_GAME: 
 								begin
-								counter_game <= counter_game+32'd1;
-
+								counter_game <= counter_game+1;
 								game_RNG <= counter_game % 32'd3;  //just use some nonlinear function here
-								
 								if (game_RNG ==32'd0) begin
 									sensor_out_game <= OUT3;
 									game_state <= #1 GAME3;
@@ -209,7 +208,7 @@ begin
 								end else if (game_RNG ==32'd2) begin
 									sensor_out_game <= OUT1;
 									game_state <= #1 GAME1;
-								end else if (counter_game >20) begin 
+								end if (counter_game >20) begin 
 									game_state <= #1 GAMEOVER;
 									
 								end 
@@ -268,9 +267,24 @@ begin
 
 								end	
 							GAMEOVER:
-								begin
+							begin 
 								game_state <= #1 GAMEOVER;
+								if (high1 < points) high1 <= points;
+								else if (high2 < points) high2 <= points;
+								else if (high3 < points) high3 <= points; 
+								if (state != MODE_GAME) begin
+								   if (counter_int < MAX_COUNT)
+									points <= high1;
+									else if (counter_int >MAX_COUNT && counter_int<MAX_COUNT*2)
+									points <= high2;
+									else if (counter_int >MAX_COUNT*2 && counter_int<MAX_COUNT*3)
+									points <= high3;
+									else if (counter_int > MAX_COUNT*3)
+									counter_int <= 0;
+									else 
+									counter_int <= counter_int +1;
 								end
+							end	
 						endcase
 					end
 						
@@ -333,6 +347,8 @@ begin
 		
 		if(screen_reg == GAME)
 		begin //display game screen
+			if((x > 10'd75) && (x<10'd572)&&(y<10'd98) && (y>10'd60)) color_output<=24'hFFFFFF; //no scores
+
 			if((x > 10'd71) && (x<10'd573)&&(y<10'd97) && (y>10'd0)) color_output<=24'hFFFFFF;
 			if(animation_reg == 6'b000001) begin
 			//182,271: 274, 334

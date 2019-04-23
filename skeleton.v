@@ -67,6 +67,8 @@ module skeleton(resetn,
 	output [31:0] counter; 
 	wire [31:0] sensor_output; 
 	wire [31:0] adjusted_sensor_output; 
+	wire [31:0] screen_out; 
+	wire [31:0] out_game; 
 	// clock divider (by 5, i.e., 10 MHz)
 	pll div(CLOCK_50,inclock);
 	assign clock = CLOCK_50;
@@ -75,9 +77,9 @@ module skeleton(resetn,
 //   assign clock = inclock;
 	
 	// your processor
-	processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, save_signal, load_signal, counter/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
+//	processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, save_signal, load_signal, counter/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
 	
-//	processor_skeleton_alt myprocessor_alt(clock, ~resetn, sensor_input, sensor_output, controller, screen_out, score_out, mistake,/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ debug_data_in, debug_addr);
+	processor_skeleton_alt myprocessor_alt(clock, ~resetn, sensor_input, sensor_output, ~controller, screen_out/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ );
 	
 	// keyboard controller
 	PS2_Interface myps2(clock, resetn, ps2_clock, ps2_data, ps2_key_data, ps2_key_pressed, ps2_out);
@@ -100,15 +102,33 @@ module skeleton(resetn,
 	// some LEDs that you could use for debugging if you wanted
 	assign leds = 8'b00101011;
 	
-   or or_pad1(adjusted_sensor_output[0], ~sensor_output[0], ~sensor_output[1], ~sensor_output[2], ~sensor_output[3], ~sensor_output[4]);
-	or or_pad2(adjusted_sensor_output[1], ~sensor_output[5], ~sensor_output[6], ~sensor_output[7], ~sensor_output[8], ~sensor_output[9]);
-	or or_pad3(adjusted_sensor_output[2], ~sensor_output[14], ~sensor_output[13], ~sensor_output[12], ~sensor_output[11], ~sensor_output[10]);
-	
+//   or or_pad1(adjusted_sensor_output[0], ~sensor_output[0], ~sensor_output[1], ~sensor_output[2], ~sensor_output[3], ~sensor_output[4]);
+//	or or_pad2(adjusted_sensor_output[1], ~sensor_output[5], ~sensor_output[6], ~sensor_output[7], ~sensor_output[8], ~sensor_output[9]);
+//	or or_pad3(adjusted_sensor_output[2], ~sensor_output[14], ~sensor_output[13], ~sensor_output[12], ~sensor_output[11], ~sensor_output[10]);
+//	
 		
 	// VGA
 	Reset_Delay			r0	(.iCLK(CLOCK_50),.oRESET(DLY_RST)	);
 	VGA_Audio_PLL 		p1	(.areset(~DLY_RST),.inclk0(CLOCK_50),.c0(VGA_CTRL_CLK),.c1(AUD_CTRL_CLK),.c2(VGA_CLK)	);
-	vga_controller vga_ins(.iRST_n(DLY_RST),
+//	vga_controller vga_ins(.iRST_n(DLY_RST),
+//								 .iVGA_CLK(VGA_CLK),
+//								 .oBLANK_n(VGA_BLANK),
+//								 .oHS(VGA_HS),
+//								 .oVS(VGA_VS),
+//								 .b_data(VGA_B),
+//								 .g_data(VGA_G),
+//								 .r_data(VGA_R), 
+//								 .sensor_input(sensor_input), //input
+//								 .sensor_output_adjusted(adjusted_sensor_output), //input
+//								 .controller(controller), //input
+//								 .sensor_input_to_save(sensor_input_to_save), //output to processor
+//								 .save_signal(save_signal), //output to processor
+//								 .load_signal(load_signal), 
+//								 .state_load_out(state_load_out), 
+//								 .load_counter(counter), //output to processor
+//								 .final_out_dummy(final_sensor_output)); 
+
+	vga_controller_alt vga_ins_alt(.iRST_n(DLY_RST),
 								 .iVGA_CLK(VGA_CLK),
 								 .oBLANK_n(VGA_BLANK),
 								 .oHS(VGA_HS),
@@ -116,16 +136,12 @@ module skeleton(resetn,
 								 .b_data(VGA_B),
 								 .g_data(VGA_G),
 								 .r_data(VGA_R), 
-								 .sensor_input(sensor_input), //input
-								 .sensor_output_adjusted(adjusted_sensor_output), //input
-								 .controller(controller), //input
-								 .sensor_input_to_save(sensor_input_to_save), //output to processor
-								 .save_signal(save_signal), //output to processor
-								 .load_signal(load_signal), 
-								 .state_load_out(state_load_out), 
-								 .load_counter(counter), //output to processor
-								 .final_out_dummy(final_sensor_output)); 
-								 
+							 .sensor_input(sensor_input), 
+							 .screen(screen_out),
+							 .out_game(out_game));
+	wire case_game; 
+	or or_out_game_not_zero(out_game[0], out_game[1], out_game[2], out_game[3], out_game[4], out_game[5]); 
+	assign out_final = case_game ? out_game : sensor_output;  
 //	wire game_over; 
 //	assign game_over = 1'b0; 
 //	DE2_Audio_Example audio_inst (

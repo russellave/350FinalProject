@@ -11,7 +11,7 @@ module skeleton(resetn,
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
-	CLOCK_50, sensor_input, final_sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out, state_load_out, counter);  													// 50 MHz clock
+	CLOCK_50, sensor_input, final_sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out, state_load_out, counter, screen_out);  													// 50 MHz clock
 		
 	////////////////////////	VGA	////////////////////////////
 	output			VGA_CLK;   				//	VGA Clock
@@ -57,7 +57,7 @@ module skeleton(resetn,
 	input [31:0] controller; //only first 3 bits matter. goes to processor (address 2)
 	output [31:0] controller_output; 
 	
-	assign controller_output = controller; 
+	assign controller_output = not_controller; 
 
 	//output vga
 	wire [31:0] sensor_input_to_save; 
@@ -67,7 +67,7 @@ module skeleton(resetn,
 	output [31:0] counter; 
 	wire [31:0] sensor_output; 
 	wire [31:0] adjusted_sensor_output; 
-	wire [31:0] screen_out; 
+	output [31:0] screen_out; 
 	wire [31:0] out_game; 
 	// clock divider (by 5, i.e., 10 MHz)
 	pll div(CLOCK_50,inclock);
@@ -77,9 +77,14 @@ module skeleton(resetn,
 //   assign clock = inclock;
 	
 	// your processor
-//	processor_skeleton myprocessor(clock, ~resetn, sensor_input, sensor_output, save_signal, load_signal, counter/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
-	
-	processor_skeleton_alt myprocessor_alt(clock, ~resetn, sensor_input, sensor_output, ~controller, screen_out/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/ );
+//	processor_skeleton myprocessor(.clock(clock), .reset(~resetn), .sensor_input(sensor_input), .sensor_output(sensor_output), .save_signal(save_signal), .load_signal(load_signal), .counter(counter)/*ps2_key_pressed, ps2_out, lcd_write_en, lcd_write_data,*/);
+	wire [31:0] not_controller; 
+	not not0(not_controller[0], controller [0]);
+	not not1(not_controller[1], controller [1]);
+	not not2(not_controller[2], controller [2]);
+	not not3(not_controller[3], controller [3]);
+
+	processor_skeleton_alt myprocessor_alt(.clock(clock), .reset(~resetn), .sensor_input(sensor_input), .sensor_output(sensor_output), .controller(not_controller), .screen_out(screen_out) );
 	
 	// keyboard controller
 	PS2_Interface myps2(clock, resetn, ps2_clock, ps2_data, ps2_key_data, ps2_key_pressed, ps2_out);
@@ -141,7 +146,7 @@ module skeleton(resetn,
 							 .out_game(out_game));
 	wire case_game; 
 	or or_out_game_not_zero(out_game[0], out_game[1], out_game[2], out_game[3], out_game[4], out_game[5]); 
-	assign out_final = case_game ? out_game : sensor_output;  
+	assign final_sensor_output = case_game ? out_game : sensor_output;  
 //	wire game_over; 
 //	assign game_over = 1'b0; 
 //	DE2_Audio_Example audio_inst (

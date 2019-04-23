@@ -158,7 +158,7 @@ always@(posedge VGA_CLK_n)
 begin
 		bgr_data <= bgr_data_raw;
 		sensor_in <= sensor_input;
-		screen_reg <=  screen; 
+		screen_input_reg <= screen; 
 		//FSM
 		case(state)
 		 MODE_SPLASH : if (screen_input_reg == 32'd1) begin
@@ -168,17 +168,17 @@ begin
 						  state <=  #1  MODE_SPLASH;
 						  screen_reg <= SPLASH; 
 						end
-		 MODE_MAIN : if (screen_input_reg = 32'd2) begin
+		 MODE_MAIN : if (screen_input_reg == 32'd2) begin
 						  state <=  #1  MODE_SL;
 						  screen_reg <= SL; 
-					end else if (scren_input_reg = 32'd3) begin
+					end else if (screen_input_reg == 32'd3) begin
 						  state <=  #1  MODE_GAME;
 						  screen_reg <= GAME; 
 					 end else begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 						end
-		 MODE_SL : if (screen_input_reg = 32'd1) begin
+		 MODE_SL : if (screen_input_reg == 32'd1) begin
 						  state <=  #1  MODE_MAIN;
 						  screen_reg <= MAIN; 
 					 end else begin

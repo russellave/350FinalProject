@@ -11,7 +11,8 @@ module skeleton(resetn,
 	VGA_R,   														//	VGA Red[9:0]
 	VGA_G,	 														//	VGA Green[9:0]
 	VGA_B,															//	VGA Blue[9:0]
-	CLOCK_50, sensor_input, final_sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out, state_load_out, counter, CLOCK_27, KEY, SW, AUD_ADCDAT, AUD_BCLK, AUD_ADCLRCK, AUD_DACLRCK, I2C_SDAT, AUD_XCK, AUD_DACDAT, I2C_SCLK);  													// 50 MHz clock
+	CLOCK_50, sensor_input, final_sensor_output, controller, controller_output, save_signal, load_signal, sensor_input_out, state_load_out, counter, CLOCK_27,
+	KEY, SW, AUD_ADCDAT, AUD_BCLK, AUD_ADCLRCK, AUD_DACLRCK, I2C_SDAT, AUD_XCK, AUD_DACDAT, I2C_SCLK, scoreconverted);  													// 50 MHz clock
 		
 	////////////////////////	VGA	////////////////////////////
 	output			VGA_CLK;   				//	VGA Clock
@@ -34,7 +35,7 @@ module skeleton(resetn,
 	output 	[6:0] 	seg1, seg2, seg3, seg4, seg5, seg6, seg7, seg8;
 	output 	[31:0] 	debug_data_in;
 	output   [11:0]   debug_addr;
-	
+	output [20:0] scoreconverted;
 	
 	
 	
@@ -142,7 +143,8 @@ module skeleton(resetn,
 								 .r_data(VGA_R), 
 							 .sensor_input(sensor_input), 
 							 .screen(screen_out),
-							 .out_game(out_game));
+							 .out_game(out_game),
+							 .scoreconverted(scoreconverted));
 	wire case_game; 
 	or or_out_game_not_zero(out_game[0], out_game[1], out_game[2], out_game[3], out_game[4], out_game[5]); 
 	assign out_final = case_game ? out_game : sensor_output;  

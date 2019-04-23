@@ -8,7 +8,7 @@ module vga_controller_alt(iRST_n,
                       r_data,
 							 sensor_input, 
 							 screen,
-							 out_game);
+							 out_game,scoreconverted);
 
 	
 input iRST_n;
@@ -24,6 +24,7 @@ output [7:0] r_data;
 input [31:0] sensor_input; 
 input [31:0] screen; 
 output [31:0] out_game; 
+output [20:0] scoreconverted;
 ///////// ////        
              
 reg [18:0] ADDR;
@@ -33,6 +34,7 @@ wire [7:0] index;
 wire [7:0] index_main; 
 wire [7:0] index_splash; 
 wire [7:0] index_animation; 
+wire [9:0] score;
 wire [31:0] screen; 
 wire [23:0] bgr_data_raw;
 wire [23:0] bgr_data_raw_splash;
@@ -392,7 +394,8 @@ assign b_data = color_output[23:16];
 assign g_data = color_output[15:8];
 assign r_data = color_output[7:0]; 
 assign  out_game = sensor_out_game; 
-
+assign score = points[9:0];
+modulo scoreconverter(score,scoreconverted);
 ///////////////////
 //////Delay the iHD, iVD,iDEN for one clock cycle;
 always@(negedge iVGA_CLK)

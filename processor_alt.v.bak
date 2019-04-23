@@ -47,7 +47,7 @@
  * Outputs: 32-bit data at the given address
  *
  */
-module processor_alt(
+module processor(
     // Control signals
     clock,                          // I: The master clock
     reset,                          // I: A reset signal

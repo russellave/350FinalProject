@@ -106,10 +106,10 @@ img_index splash_index_inst(
 	.clock(iVGA_CLK),
 	.q(bgr_data_raw_splash)); 
 	
-img_index ani_index_inst(
-	.address(index_animation), 
-	.clock(iVGA_CLK),
-	.q(bgr_data_raw_ani)); 	
+//img_index ani_index_inst(
+//	.address(index_animation), 
+//	.clock(iVGA_CLK),
+//	.q(bgr_data_raw_ani)); 	
 //////
 //////latch valid data at falling edge;
 

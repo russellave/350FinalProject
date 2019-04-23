@@ -9,7 +9,7 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module processor_skeleton(clock, reset,sensor_input, sensor_output, controller, screen_out, score_out, mistake //rest is debugging
+module processor_skeleton_alt(clock, reset,sensor_input, sensor_output, controller, screen_out, score_out, mistake //rest is debugging
 ,address_imem,q_imem,address_dmem,
 data,wren,q_dmem,ctrl_writeEnable,ctrl_writeReg,ctrl_readRegA,ctrl_readRegB,
 data_writeReg,data_readRegA,data_readRegB);

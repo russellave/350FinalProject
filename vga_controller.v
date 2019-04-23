@@ -147,7 +147,7 @@ reg [31:0] points;
 reg [15:0] counter_hit; 
 
 //fsm stuff
-parameter MAX_COUNT = 32'd20000000; 
+parameter MAX_COUNT = 32'd200000000; 
 parameter SIZE = 3, SIZE_CONTROLLER = 32, SIZE_LOAD = 3, SIZE_OUTPUT = 3; 
 parameter SPLASH  = 3'b000, MAIN= 3'b001, SL = 3'b010, GAME = 3'b011; //screens (not states but just useful)
 parameter MODE_SPLASH = 3'b000, MODE_MAIN = 3'b001, MODE_SAVE = 3'b010, MODE_LOAD = 3'b011, MODE_GAME = 3'b100; //modes
@@ -238,6 +238,7 @@ begin
 							WAIT_GAME: 
 								begin
 								counter_game <= counter_game+32'd1;
+								counter_int <= 0; 
 
 								game_RNG <= counter_game % 32'd3;  //just use some nonlinear function here
 								
@@ -253,7 +254,7 @@ begin
 								end else if (counter_game >20) begin 
 									game_state <= #1 GAMEOVER;
 									
-								end 
+								end
 								end
 							GAME1:
 								if (sensor_in[14:10] != 5'b11111) begin 
@@ -267,9 +268,10 @@ begin
 									animation_reg <= 6'b000011;
 								end else if( counter > MAX_COUNT*1/3) begin
 									animation_reg <= 6'b000010;
+								end else if (counter > 0) begin
+									animation_reg <= 6'b000001;
 								end else begin
 									counter_int <= counter_int+1;
-									animation_reg <= 6'b000001;
 									game_state <= GAME1; 
 								end
 							GAME2:
@@ -284,9 +286,10 @@ begin
 									animation_reg <= 6'b001100;
 								end else if (counter > MAX_COUNT*1/3) begin
 									animation_reg <= 6'b001000;
+								end else if (counter > 0) begin
+									animation_reg <= 6'b000100;
 								end else begin
 									counter_int <= counter_int+1;
-									animation_reg <= 6'b000100;
 									game_state <= GAME2; 
 								
 								end
@@ -302,9 +305,10 @@ begin
 									animation_reg <= 6'b110000;
 								end else if (counter > MAX_COUNT*1/3) begin
 									animation_reg <= 6'b100000;
+								end else if (counter > 0) begin
+									animation_reg <= 6'b010000;
 								end else begin
 									counter_int <= counter_int+1;
-									animation_reg <= 6'b010000;
 									game_state <= GAME3; 
 
 								end	

@@ -21,6 +21,8 @@ data_writeReg,data_readRegA,data_readRegB);
 	 input [31:0] load_signal; //address 3 dmem
 	 output [31:0] sensor_output; //address 2 dmem
 	 input [31:0] counter; //addrsss 5 dmem
+	 wire [31:0] load_counter; 
+	 assign load_counter = counter; 
 	 
 
     /** IMEM **/
@@ -91,7 +93,7 @@ data_writeReg,data_readRegA,data_readRegB);
         data_writeReg,                  // O: Data to write to for regfile
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB,                   // I: Data from port B of regfile
-		  sensor_input_to_save, sensor_output, save_signal, load_signal,counter
+		  sensor_input_to_save, sensor_output, save_signal, load_signal,load_counter
     );
 
 endmodule
